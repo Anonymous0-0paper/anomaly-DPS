@@ -32,7 +32,7 @@ The following datasets were used for evaluation:
 
 ### 5. MSL (Mars Science Laboratory)
 - **Description**: Multivariate time series data collected from NASA spacecraft sub-systems, used for anomaly detection.
-- [📥 Download Dataset](https://github.com/kLabUM/MTA-Dataset-Release)
+- [📥 Download Dataset](https://pds-atmospheres.nmsu.edu/data_and_services/atmospheres_data/Mars/Mars.html)
 
 ---
 
@@ -50,13 +50,13 @@ The following datasets were used for evaluation:
 
 ### 8. WADI (Water Distribution (Drinking) Testbed for Anomaly Detection)
 - **Description**: Industrial water distribution testbed with labeled cyber-physical attacks.
-- [📥 Download Dataset](https://itrust.sutd.edu.sg/itrust_lab_website/resources/resources/datasets/)
+- [📥 Download Dataset](https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/#wadi)
 
 ---
 
 ### 9. SWaT (Secure Water Treatment)
 - **Description**: Dataset from a fully operational water treatment testbed with real cyber-physical attacks.
-- [📥 Download Dataset](https://itrust.sutd.edu.sg/itrust_lab_website/resources/resources/datasets/)
+- [📥 Download Dataset](https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/#swat)
 
 ---
 
