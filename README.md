@@ -38,7 +38,7 @@ The following datasets were used for evaluation:
 
 ### 6. SMAP (Soil Moisture Active Passive)
 - **Description**: Sensor data from NASA’s Earth satellite missions; includes labeled anomalies.
-- [📥 Download Dataset](https://github.com/kLabUM/MTA-Dataset-Release)
+- [📥 Download Dataset](https://smap.jpl.nasa.gov/data/)
 
 ---
 
