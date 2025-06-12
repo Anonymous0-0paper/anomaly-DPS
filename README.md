@@ -1,4 +1,4 @@
-# **Dynamic Contrastive Self-Supervised Learning with Kolmogorov-Arnold Networks for Anomaly Detection in Multivariate Data Streams with Concept Drift**
+# **Dynamic Contrastive Self-Supervised Learning via Kolmogorov-Arnold Networks for Anomaly Detection in Multivariate Data Streams with Concept Drift**
 
 This repository contains the implementation of a novel approach to anomaly detection in multivariate data streams. The method leverages **dynamic contrastive self-supervised learning** combined with **Kolmogorov-Arnold Networks (KANs)** to effectively detect anomalies in environments where data distributions evolve over time (**concept drift**).
 
