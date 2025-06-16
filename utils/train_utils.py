@@ -14,14 +14,30 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
     print(f"Using device: {device}")
     model = model.to(device)
 
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Define model save path
+    model_path = os.path.join(output_dir, "best_model.pth")
+
     # Calculate class weights (for handling imbalanced data)
     all_labels = []
     for batch in train_loader:
         all_labels.extend(batch['y'].numpy())
 
     class_counts = np.bincount(all_labels, minlength=num_classes)
-    class_weights = 1.0 / np.sqrt(class_counts + 1e-5)
-    class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
+    print(f"Class distribution: {class_counts}")
+
+    if num_classes == 2:
+        anomaly_ratio = class_counts[1] / (class_counts[0] + class_counts[1] + 1e-5)
+        normal_weight = 1.0
+        anomaly_weight = max(50.0, 1.0 / (anomaly_ratio + 1e-5))
+        class_weights = torch.tensor([normal_weight, anomaly_weight], dtype=torch.float32).to(device)
+        print(f"Anomaly ratio: {anomaly_ratio:.6f}, Class weights: normal={normal_weight}, anomaly={anomaly_weight}")
+    else:
+        class_weights = 1.0 / np.sqrt(class_counts + 1e-5)
+        class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
+        print(f"Class weights: {class_weights.cpu().numpy()}")
 
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss(weight=class_weights)
@@ -41,7 +57,10 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
         )
 
     best_val_f1 = 0.0
+    best_model_state = None
     history = {'train_loss': [], 'val_acc': [], 'val_f1': []}
+    epochs_no_improve = 0
+    patience = 5
 
     for epoch in range(epochs):
         # Training phase
@@ -92,12 +111,37 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
         print(f"  Val Acc: {val_acc:.4f} | Val F1: {val_f1:.4f}")
         print(f"  Current learning rate: {optimizer.param_groups[0]['lr']:.6f}")
 
+        # Print more metrics for binary classification
+        if num_classes == 2:
+            print(f"  Val Precision: {val_metrics['precision']:.4f} | Val Recall: {val_metrics['recall']:.4f}")
+
+        if epoch == 0:
+            best_val_f1 = val_f1
+            best_model_state = model.state_dict()
+            torch.save(best_model_state, model_path)
+            print(f"  Saving initial model to {model_path}")
+
         # Save the best model
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
-            model_path = os.path.join(output_dir, "best_model.pth")
-            torch.save(model.state_dict(), model_path)
-            print(f"  🎯 Saving new best model to {model_path}, Validation F1: {val_f1:.4f}")
+            best_model_state = model.state_dict()
+            torch.save(best_model_state, model_path)
+            print(f"  Saving new best model to {model_path}, Validation F1: {val_f1:.4f}")
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve >= patience:
+                print(f"  No improvement for {patience} epochs, early stopping...")
+                break
+
+    # Ensure at least one model is saved
+    if best_model_state is None:
+        best_model_state = model.state_dict()
+        torch.save(best_model_state, model_path)
+        print(f" No best model found, saving final model to {model_path}")
+
+    # Load best model weights
+    model.load_state_dict(best_model_state)
 
     print(f"\nTraining completed. Best validation F1 score: {best_val_f1:.4f}")
 

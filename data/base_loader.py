@@ -41,11 +41,11 @@ class AnomalyDetectionDatasets(Dataset):
         seq_labels = self.labels[start:end]
 
         # Determine the main label of the window
-        if self.num_classes > 2:  # Multiclass
+        if self.num_classes == 2:  # Binary classification
+            label = 1 if np.any(seq_labels == 1) else 0
+        else:  # Multiclass
             label_counts = np.bincount(seq_labels, minlength=self.num_classes)
-            label = np.argmax(label_counts)  # Select the most frequent class
-        else:  # Binary classification
-            label = 1 if np.sum(seq_labels) > self.window_size / 2 else 0
+            label = np.argmax(label_counts)
 
         return {
             'x': torch.tensor(seq_features, dtype=torch.float32),
