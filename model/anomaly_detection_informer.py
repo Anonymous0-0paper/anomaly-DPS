@@ -1,20 +1,24 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class AnomalyDetectionInformer(nn.Module):
-    """Network security anomaly detection model based on Informer architecture"""
+    """Unified supervised/unsupervised anomaly detection model"""
 
-    def __init__(self, num_features, num_classes, d_model=128, n_heads=8, e_layers=3, dropout=0.1):
+    def __init__(self, num_features, num_classes=2, d_model=128, n_heads=8, e_layers=3, dropout=0.1):
         """
         Parameters:
         num_features: Input feature dimension
-        num_classes: Number of output classes
+        num_classes: Number of output classes (used in supervised mode)
         d_model: Model dimension
         n_heads: Number of attention heads
         e_layers: Number of encoder layers
         dropout: Dropout probability
         """
         super().__init__()
+        self.num_features = num_features
+        self.num_classes = num_classes
+        self.d_model = d_model
 
         # Input embedding layer
         self.input_embedding = nn.Linear(num_features, d_model)
@@ -34,12 +38,7 @@ class AnomalyDetectionInformer(nn.Module):
             for _ in range(e_layers)
         ])
 
-        # Attention pooling layer
-        self.attention_pool = nn.MultiheadAttention(
-            d_model, 1, dropout=dropout, batch_first=True
-        )
-
-        # Classification head
+        # Classification head (supervised mode)
         self.classifier = nn.Sequential(
             nn.Linear(d_model, d_model // 2),
             nn.ReLU(),
@@ -47,7 +46,20 @@ class AnomalyDetectionInformer(nn.Module):
             nn.Linear(d_model // 2, num_classes)
         )
 
-    def forward(self, x):
+        # Reconstruction head (unsupervised mode)
+        self.reconstructor = nn.Sequential(
+            nn.Linear(d_model, d_model),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_model, num_features)
+        )
+
+        # Attention pooling
+        self.attention_pool = nn.MultiheadAttention(
+            d_model, 1, dropout=dropout, batch_first=True
+        )
+
+    def forward(self, x, training_mode='supervised'):
         """Forward propagation"""
         batch_size, seq_len, num_features = x.shape
 
@@ -61,16 +73,33 @@ class AnomalyDetectionInformer(nn.Module):
         # Combined embedding
         combined = x_emb + pos_emb
 
-        # Through encoder layers
+        # Encoder processing
         encoder_output = combined
         for layer in self.encoder_layers:
             encoder_output = layer(encoder_output)
 
         # Attention pooling
-        query = encoder_output.mean(dim=1, keepdim=True)  # (batch_size, 1, d_model)
+        query = encoder_output.mean(dim=1, keepdim=True)
         pooled, _ = self.attention_pool(query, encoder_output, encoder_output)
-        pooled = pooled.squeeze(1)  # (batch_size, d_model)
+        pooled = pooled.squeeze(1)
 
-        # Classification prediction
-        logits = self.classifier(pooled)
-        return logits
+        # Return different outputs based on training mode
+        if training_mode == 'unsupervised':
+            # Unsupervised mode: reconstruct sequence
+            reconstructed = self.reconstructor(pooled)
+            reconstructed = reconstructed.unsqueeze(1).repeat(1, seq_len, 1)
+            return None, reconstructed  # Classification output is None
+        else:
+            # Supervised mode: classification output
+            logits = self.classifier(pooled)
+            return logits, None  # Reconstruction output is None
+
+    def predict_anomaly(self, x):
+        """Predict anomaly (for unsupervised mode only)"""
+        with torch.no_grad():
+            _, reconstructed = self.forward(x, training_mode='unsupervised')
+            # Calculate reconstruction error
+            reconstruction_error = F.mse_loss(reconstructed, x, reduction='none')
+            # Average error per sample (batch_size,)
+            sample_errors = reconstruction_error.mean(dim=(1, 2))
+            return sample_errors
