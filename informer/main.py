@@ -2,17 +2,17 @@ import os
 import time
 import torch
 import numpy as np
-import pandas as pd
 from torch.utils.data import DataLoader
 from config import CONFIG  # Use the new configuration interface
-from data import get_data_loader, AnomalyDetectionDatasets
-from model.anomaly_detection_informer import AnomalyDetectionInformer
-from utils.train_utils import train_model
-from utils.metrics import evaluate_model, plot_confusion_matrix, plot_training_history
+from informer.data_loader import get_data_loader, AnomalyDetectionDatasets
+from informer.model import AnomalyDetectionInformer
+from informer.utils import train_model
+from informer.utils import evaluate_model
+
 
 def preprocess_time_series(X_train, X_test):
-    """Time series data preprocessing"""
-    # Combine data for standardization
+    """Time series data_loader preprocessing"""
+    # Combine data_loader for standardization
     combined = np.vstack((X_train, X_test))
 
     # Handle NaN and infinite values
@@ -54,7 +54,7 @@ def main():
     if dataset_name == 'smd' and hasattr(dataset_config, 'machine_id'):
         dataset_id += f"_{dataset_config.machine_id}"
 
-    output_dir = f"results_{dataset_id}_{timestamp}"
+    output_dir = f"informer/result/results_{dataset_id}_{timestamp}"
     os.makedirs(output_dir, exist_ok=True)
     print(f"Results will be saved to directory: {output_dir}")
 
@@ -87,13 +87,13 @@ def main():
         **kwargs
     )
 
-    # Print data distribution
+    # Print data_loader distribution
     print(f"\nTraining set class distribution: Normal={np.sum(y_train == 0)}, Anomaly={np.sum(y_train == 1)}")
     print(f"Test set class distribution: Normal={np.sum(y_test == 0)}, Anomaly={np.sum(y_test == 1)}")
 
     # Time series preprocessing
     if dataset_name in ['msl', 'smap', 'smd', 'swat', 'wadi']:
-        print("\nPreprocessing time series data...")
+        print("\nPreprocessing time series data_loader...")
         X_train, X_test = preprocess_time_series(X_train, X_test)
     else:
         print("\nSkipping time series preprocessing (network datasets)")
@@ -105,9 +105,9 @@ def main():
     print(f"  Number of classes: {num_classes}")
     print(f"  Class names: {class_names}")
 
-    # Check data shape (ensure it's a 2D array)
+    # Check data_loader shape (ensure it's a 2D array)
     if len(X_train.shape) == 1:
-        print(f"Reshaping data from 1D to 2D (adding feature dimension)")
+        print(f"Reshaping data_loader from 1D to 2D (adding feature dimension)")
         X_train = X_train.reshape(-1, 1)
         X_test = X_test.reshape(-1, 1)
 
@@ -178,7 +178,7 @@ def main():
     device = torch.device(CONFIG.DEVICE)
     print(f"\nUsing device: {device}")
 
-    # Create data loaders (only use pin_memory on CUDA devices)
+    # Create data_loader loaders (only use pin_memory on CUDA devices)
     pin_memory = (device.type == "cuda")
 
     train_loader = DataLoader(

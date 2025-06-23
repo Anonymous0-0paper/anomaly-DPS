@@ -31,7 +31,7 @@ def load_swat_data(file_path, version='v2'):
                 dtype = str(headers.iloc[1, i]).strip() if not pd.isna(headers.iloc[1, i]) else "value"
                 column_names.append(f"{device}_{dtype}")
 
-            # Read actual data (skip headers)
+            # Read actual data_loader (skip headers)
             df = pd.read_excel(file_path, header=None, skiprows=2, names=column_names)
         else:
             # v1 version has only one header row

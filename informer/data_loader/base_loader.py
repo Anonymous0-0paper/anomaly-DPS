@@ -23,11 +23,11 @@ class AnomalyDetectionDatasets(Dataset):
         self.training_mode = training_mode
         self.num_features = features.shape[1] if len(features.shape) > 1 else 1
 
-        # Validate data
+        # Validate data_loader
         if len(features) == 0:
-            raise ValueError("Feature data is empty")
+            raise ValueError("Feature data_loader is empty")
         if len(labels) == 0:
-            raise ValueError("Label data is empty")
+            raise ValueError("Label data_loader is empty")
         if window_size <= 0:
             raise ValueError(f"Invalid window size: {window_size}")
         if stride <= 0:
@@ -53,16 +53,16 @@ class AnomalyDetectionDatasets(Dataset):
 
         # Handle no samples case
         if len(self.samples) == 0:
-            print(f"Warning: No samples created (data length={len(features)}, window size={window_size}, stride={stride})")
+            print(f"Warning: No samples created (data_loader length={len(features)}, window size={window_size}, stride={stride})")
 
             # Case 1: Data length is less than window size
             if len(features) < window_size:
                 # Calculate padding needed
                 padding_needed = window_size - len(features)
 
-                # Correctly pad feature data (2D array)
+                # Correctly pad feature data_loader (2D array)
                 if len(features.shape) == 1:
-                    # If it's 1D data, convert to 2D first
+                    # If it's 1D data_loader, convert to 2D first
                     features = features.reshape(-1, 1)
                 self.features = np.pad(
                     features,
@@ -70,14 +70,14 @@ class AnomalyDetectionDatasets(Dataset):
                     mode='constant'
                 )
 
-                # Pad label data (1D array)
+                # Pad label data_loader (1D array)
                 self.labels = np.pad(
                     labels,
                     (0, padding_needed),  # Pad at the end
                     mode='constant'
                 )
                 self.samples = [0]  # Only one sample
-                print(f"Padded data: Features shape={self.features.shape}, Labels length={len(self.labels)}")
+                print(f"Padded data_loader: Features shape={self.features.shape}, Labels length={len(self.labels)}")
 
             # Case 2: Data length is sufficient but stride is too large
             else:
@@ -107,7 +107,7 @@ class AnomalyDetectionDatasets(Dataset):
                 counts[label] += 1
             else:
                 label_counts = np.bincount(seq_labels, minlength=self.num_classes)
-                if len(label_counts) > 0:  # Ensure there is data
+                if len(label_counts) > 0:  # Ensure there is data_loader
                     label = np.argmax(label_counts)
                     counts[label] += 1
 
@@ -125,13 +125,13 @@ class AnomalyDetectionDatasets(Dataset):
             # Need padding
             padding = end - len(self.features)
 
-            # Get existing data
+            # Get existing data_loader
             seq_features = self.features[start:]
             seq_labels = self.labels[start:]
 
-            # Correctly pad feature data (2D array)
+            # Correctly pad feature data_loader (2D array)
             if len(seq_features) == 0:
-                # If completely out of range, create all-zero data
+                # If completely out of range, create all-zero data_loader
                 seq_features = np.zeros((self.window_size, self.num_features))
                 seq_labels = np.zeros(self.window_size)
             else:
@@ -141,7 +141,7 @@ class AnomalyDetectionDatasets(Dataset):
                     ((0, padding), (0, 0)),  # Pad in sample dimension
                     mode='constant'
                 )
-                # Pad label data (1D array)
+                # Pad label data_loader (1D array)
                 seq_labels = np.pad(
                     seq_labels,
                     (0, padding),  # Pad at the end

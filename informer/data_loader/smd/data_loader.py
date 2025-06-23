@@ -27,7 +27,7 @@ def load_smd_data(base_path, machine_id):
     print(f"  Test data: {test_path}")
     print(f"  Test labels: {label_path}")
 
-    # Load data - handle possible space/comma separation
+    # Load data_loader - handle possible space/comma separation
     def load_txt_file(file_path):
         data = []
         with open(file_path, 'r') as f:
@@ -45,21 +45,21 @@ def load_smd_data(base_path, machine_id):
                     continue
         return np.array(data)
 
-    # Load training data
+    # Load training data_loader
     X_train = load_txt_file(train_path).astype(np.float32)
 
-    # Load test data
+    # Load test data_loader
     X_test = load_txt_file(test_path).astype(np.float32)
 
     # Load test labels
     y_test = load_txt_file(label_path).astype(np.int32)
 
-    # Validate data dimensions
+    # Validate data_loader dimensions
     if y_test.ndim > 1:
         # If labels are multiple columns, take the first column
         y_test = y_test[:, 0]
 
-    # Training data has no labels, all marked as normal
+    # Training data_loader has no labels, all marked as normal
     y_train = np.zeros(X_train.shape[0], dtype=np.int32)
 
     # Check dimension consistency

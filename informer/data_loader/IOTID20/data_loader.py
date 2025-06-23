@@ -9,7 +9,7 @@ def load_and_preprocess_iot_data(file_path, task='multiclass'):
     print(f"{'IoT Network Intrusion Dataset Preprocessing':^80}")
     print("=" * 80)
 
-    # Load data
+    # Load data_loader
     df = pd.read_csv(file_path)
     print(f"Original dataset size: {df.shape}")
 

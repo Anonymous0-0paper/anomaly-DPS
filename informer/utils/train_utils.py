@@ -14,6 +14,7 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
     print(f"{'Start Unified Model Training':^80}")
     print("=" * 80)
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Using device: {device}")
     model = model.to(device)
 
@@ -64,8 +65,15 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
     PATIENCE = 5
 
     # Device-specific settings
-    use_amp = (device.type == 'cuda')  # Only CUDA supports mixed precision
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    use_amp = False
+    if device.type == 'cuda':
+        use_amp = True
+    elif device.type == 'cpu' and _cpu_supports_bfloat16():
+        use_amp = True
+
+    scaler = None
+    if use_amp and device.type == 'cuda':
+        scaler = torch.cuda.amp.GradScaler(enabled=True)
 
     # ===== 4. Training loop =====
     print("\nStarting training...")
@@ -88,8 +96,15 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
                 # Clear gradients
                 optimizer.zero_grad()
 
+                dtype = None
+                if use_amp:
+                    if device.type == 'cuda':
+                        dtype = torch.float16
+                    elif device.type == 'cpu':
+                        dtype = torch.bfloat16
+
                 # Mixed precision training
-                with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=use_amp):
+                with torch.autocast(device_type=device.type, dtype=dtype, enabled=use_amp):
                     if training_mode == 'supervised':
                         # Supervised mode
                         y = batch['y'].to(device, non_blocking=True)
@@ -102,13 +117,17 @@ def train_model(model, train_loader, val_loader, num_classes, output_dir, device
                         loss = criterion(reconstructed, target)
 
                 # Backward propagation
-                if use_amp:
+                if scaler is not None:  # CUDA 混合精度
                     scaler.scale(loss).backward()
                     scaler.unscale_(optimizer)
                     torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
                     scaler.step(optimizer)
                     scaler.update()
-                else:
+                elif use_amp and device.type == 'cpu':  # CPU BFloat16
+                    loss.backward()
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
+                    optimizer.step()
+                else:  # 无混合精度
                     loss.backward()
                     torch.nn.utils.clip_grad_norm_(model.parameters(), max_grad_norm)
                     optimizer.step()
@@ -214,3 +233,17 @@ def _estimate_class_counts(loader, num_classes, sample_fraction=0.1):
         counts = (counts * scale_factor).astype(int)
 
     return counts
+
+
+def _cpu_supports_bfloat16():
+    try:
+        if hasattr(torch.cpu.amp, 'has_bfloat16_support'):
+            return torch.cpu.amp.has_bfloat16_support()
+
+
+        import cpuinfo
+        info = cpuinfo.get_cpu_info()
+        flags = info.get('flags', [])
+        return 'avx512_bf16' in flags or 'avx512bf16' in flags
+    except:
+        return False

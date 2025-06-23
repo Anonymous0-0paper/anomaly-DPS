@@ -21,40 +21,40 @@ def load_wadi_data(base_path, version='A2'):
         train_file = os.path.join(base_path, 'WADI_14days_new.csv')
         test_file = os.path.join(base_path, 'WADI_attackdataLABLE.csv')
 
-        print(f"  Training data: {train_file}")
-        print(f"  Test data: {test_file}")
+        print(f"  Training data_loader: {train_file}")
+        print(f"  Test data_loader: {test_file}")
 
-        # 2. Load training data
-        print("\nLoading training data...")
+        # 2. Load training data_loader
+        print("\nLoading training data_loader...")
         try:
             train_df = pd.read_csv(train_file, skiprows=4, low_memory=False)
-            print("  Training data loaded with skiprows=4")
+            print("  Training data_loader loaded with skiprows=4")
         except Exception as e:
             print(f"  Warning: {str(e)}")
             print("  Trying without skipping rows...")
             train_df = pd.read_csv(train_file, low_memory=False)
-            print("  Training data loaded without skipping rows")
+            print("  Training data_loader loaded without skipping rows")
 
-        # 3. Load test data
-        print("\nLoading test data...")
+        # 3. Load test data_loader
+        print("\nLoading test data_loader...")
         try:
             test_df = pd.read_csv(test_file, skiprows=1, low_memory=False)
-            print("  Test data loaded with skiprows=1")
+            print("  Test data_loader loaded with skiprows=1")
         except Exception as e:
             print(f"  Warning: {str(e)}")
             print("  Trying without skipping rows...")
             test_df = pd.read_csv(test_file, low_memory=False)
-            print("  Test data loaded without skipping rows")
+            print("  Test data_loader loaded without skipping rows")
 
-        # 4. Print initial data shapes
-        print(f"\nInitial data shapes:")
-        print(f"  Training data: {train_df.shape}")
-        print(f"  Test data: {test_df.shape}")
+        # 4. Print initial data_loader shapes
+        print(f"\nInitial data_loader shapes:")
+        print(f"  Training data_loader: {train_df.shape}")
+        print(f"  Test data_loader: {test_df.shape}")
 
         # 5. Data preprocessing function
         def preprocess_df(df, df_name):
-            """Generic data preprocessing function"""
-            print(f"\nPreprocessing {df_name} data...")
+            """Generic data_loader preprocessing function"""
+            print(f"\nPreprocessing {df_name} data_loader...")
             print(f"  Initial shape: {df.shape}")
 
             # Drop all-empty columns
@@ -88,12 +88,12 @@ def load_wadi_data(base_path, version='A2'):
             print(f"  Final shape: {df.shape}")
             return df
 
-        # Preprocess training and test data
+        # Preprocess training and test data_loader
         train_df = preprocess_df(train_df, "training")
         test_df = preprocess_df(test_df, "test")
 
         # 6. Extract test labels
-        print("\nExtracting labels from test data...")
+        print("\nExtracting labels from test data_loader...")
         label_col = 'Attack LABLE (1:No Attack, -1:Attack)'
 
         if label_col not in test_df.columns:
@@ -113,7 +113,7 @@ def load_wadi_data(base_path, version='A2'):
             # Extract labels and drop the label column
             y_test = test_df[label_col].values
             test_df = test_df.drop(label_col, axis=1)
-            print(f"  Test labels extracted. Test data shape after drop: {test_df.shape}")
+            print(f"  Test labels extracted. Test data_loader shape after drop: {test_df.shape}")
 
         # 7. Align feature columns - solve column name mismatch issues
         print("\nAligning feature columns...")
@@ -130,10 +130,10 @@ def load_wadi_data(base_path, version='A2'):
         unique_train = train_cols - test_cols
         unique_test = test_cols - train_cols
 
-        print(f"\n  Columns only in training data ({len(unique_train)}):")
+        print(f"\n  Columns only in training data_loader ({len(unique_train)}):")
         print("    " + "\n    ".join(sorted(unique_train)[:5]) + ("..." if len(unique_train) > 5 else ""))
 
-        print(f"\n  Columns only in test data ({len(unique_test)}):")
+        print(f"\n  Columns only in test data_loader ({len(unique_test)}):")
         print("    " + "\n    ".join(sorted(unique_test)[:5]) + ("..." if len(unique_test) > 5 else ""))
 
         # Method 1: Try case-insensitive matching
@@ -252,8 +252,8 @@ def load_wadi_data(base_path, version='A2'):
         sensor_type_features = [sensor_type_mapping[stype] for stype in sensor_types]
 
         # 9. Data standardization
-        print("\nScaling data with RobustScaler...")
-        # Ensure correct data types
+        print("\nScaling data_loader with RobustScaler...")
+        # Ensure correct data_loader types
         train_df = train_df.apply(pd.to_numeric, errors='coerce').fillna(0)
         test_df = test_df.apply(pd.to_numeric, errors='coerce').fillna(0)
 

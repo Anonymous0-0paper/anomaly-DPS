@@ -16,7 +16,7 @@ def load_msl_smap_data(base_path, dataset_type):
     # Filter specified type of dataset
     dataset_df = anomaly_df[anomaly_df['spacecraft'] == dataset_type.upper()]
 
-    # Initialize data containers
+    # Initialize data_loader containers
     all_train_data = []
     all_test_data = []
     all_test_labels = []
@@ -25,12 +25,12 @@ def load_msl_smap_data(base_path, dataset_type):
     for idx, row in dataset_df.iterrows():
         chan_id = row['chan_id']
 
-        # Load training data
+        # Load training data_loader
         train_path = os.path.join(base_path, 'train', f"{chan_id}.npy")
         train_data = np.load(train_path)
         all_train_data.append(train_data)
 
-        # Load test data
+        # Load test data_loader
         test_path = os.path.join(base_path, 'test', f"{chan_id}.npy")
         test_data = np.load(test_path)
         all_test_data.append(test_data)
@@ -47,12 +47,12 @@ def load_msl_smap_data(base_path, dataset_type):
 
         all_test_labels.append(test_labels)
 
-    # Merge data from all channels
+    # Merge data_loader from all channels
     X_train = np.concatenate(all_train_data)
     X_test = np.concatenate(all_test_data)
     y_test = np.concatenate(all_test_labels)
 
-    # Training data has no labels, all marked as normal
+    # Training data_loader has no labels, all marked as normal
     y_train = np.zeros(len(X_train), dtype=int)
 
     # Convert to 2D array (n_samples, n_features)

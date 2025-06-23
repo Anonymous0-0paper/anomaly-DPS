@@ -35,7 +35,7 @@ def load_iiot_data(file_path):
     scaler = RobustScaler()
     X = scaler.fit_transform(X)
 
-    # Industrial scenarios do not require splitting into training and test sets (original data is already time-ordered)
+    # Industrial scenarios do not require splitting into training and test sets (original data_loader is already time-ordered)
     split_idx = int(len(X) * 0.8)
     X_train, X_test = X[:split_idx], X[split_idx:]
     y_train, y_test = y[:split_idx], y[split_idx:]

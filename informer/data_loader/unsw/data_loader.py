@@ -7,7 +7,7 @@ def load_unsw_data(base_path):
     train_df = pd.read_csv(f"{base_path}/UNSW_NB15_training-set.csv")
     test_df = pd.read_csv(f"{base_path}/UNSW_NB15_testing-set.csv")
 
-    # Combine data to ensure consistent encoding
+    # Combine data_loader to ensure consistent encoding
     combined = pd.concat([train_df, test_df])
 
     # Drop irrelevant columns

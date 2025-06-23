@@ -30,7 +30,7 @@ class NetworkConfig(DatasetConfig):
 # ====================== GLOBAL SETTINGS ======================
 class GlobalConfig:
     # Dataset selection (choose from available datasets)
-    DATASET_CHOICE = ('msl')
+    DATASET_CHOICE = ('swat')
 
     # Sequence parameters (default values, will be overridden by specific datasets)
     WINDOW_SIZE = 10
@@ -38,7 +38,7 @@ class GlobalConfig:
 
     # Training parameters
     BATCH_SIZE = 64
-    EPOCHS = 10
+    EPOCHS = 3
     LEARNING_RATE = 0.001
 
     # Model hyperparameters (default values, will be overridden by specific datasets)
@@ -70,7 +70,7 @@ class DatasetRegistry:
         # Time series datasets
         'msl': TimeSeriesConfig(
             name='msl',
-            path='./data/msl_smap/initialData',
+            path='data/msl_smap/initialData',
             window_size=100,
             stride=20,
             d_model=64,
@@ -79,7 +79,7 @@ class DatasetRegistry:
         ),
         'smap': TimeSeriesConfig(
             name='smap',
-            path='./data/msl_smap/initialData',
+            path='data/msl_smap/initialData',
             window_size=100,
             stride=20,
             d_model=64,
@@ -88,7 +88,7 @@ class DatasetRegistry:
         ),
         'smd': TimeSeriesConfig(
             name='smd',
-            path='./data/smd/initialData',
+            path='data/smd/initialData',
             window_size=100,
             stride=20,
             d_model=128,
@@ -98,7 +98,7 @@ class DatasetRegistry:
         ),
         'swat': TimeSeriesConfig(
             name='swat',
-            path='./data/swat/initialData/SWaT_dataset_Jul 19 v2.xlsx',
+            path='data/swat/initialData/SWaT_dataset_Jul 19 v2.xlsx',
             window_size=120,
             stride=30,
             d_model=128,
@@ -108,7 +108,7 @@ class DatasetRegistry:
         ),
         'wadi': TimeSeriesConfig(
             name='wadi',
-            path='./data/wadi/initialData/WADI.A2_19 Nov 2019',
+            path='data/wadi/initialData/WADI.A2_19 Nov 2019',
             window_size=120,
             stride=30,
             d_model=128,
@@ -120,7 +120,7 @@ class DatasetRegistry:
         # Network datasets
         'kdd': NetworkConfig(
             name='kdd',
-            path='./data/kddcup/kddcup.data',
+            path='data/kddcup/kddcup.data_loader',
             window_size=1,
             stride=1,
             task_type='multiclass',
@@ -129,7 +129,7 @@ class DatasetRegistry:
         ),
         'iot': NetworkConfig(
             name='iot',
-            path='./data/IOTID20/IoT Network Intrusion Dataset.csv',
+            path='data/IOTID20/IoT Network Intrusion Dataset.csv',
             window_size=1,
             stride=1,
             task_type='multiclass',
@@ -147,7 +147,7 @@ class DatasetRegistry:
         ),
         'iiot': NetworkConfig(
             name='iiot',
-            path='./data/wustl/wustl_iiot_2021.csv',
+            path='data/wustl/wustl_iiot_2021.csv',
             window_size=5,
             stride=1,
             task_type='multiclass',

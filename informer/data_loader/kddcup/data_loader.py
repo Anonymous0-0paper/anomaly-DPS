@@ -23,7 +23,7 @@ def load_and_preprocess_kdd_data(file_path):
         'dst_host_rerror_rate', 'dst_host_srv_rerror_rate', 'label'
     ]
 
-    # Load data
+    # Load data_loader
     df = pd.read_csv(file_path, header=None, names=columns)
     print(f"Original dataset size: {df.shape}")
 
