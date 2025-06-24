@@ -1,10 +1,10 @@
 import torch
 
 # Model configuration
-MODEL_CONFIG = {
+TIMESNET_CONFIG = {
     'seq_len': 100,
     'stride': 1,
-    'epochs': 1,
+    'epochs': 50,
     'batch_size': 32,
     'inference_batch_size': 10000,  # New: Inference batch size
     'lr': 1e-4,
@@ -14,6 +14,23 @@ MODEL_CONFIG = {
     'top_k': 5,
     'num_kernels': 6
 }
+
+ANOMALY_TRANSFORMER_CONFIG = {
+    'seq_len': 100,
+    'stride': 1,
+    'epochs': 50,
+    'batch_size': 32,
+    'inference_batch_size': 10000,
+    'lr': 1e-4,
+    'd_model': 64,
+    'd_ff': 64,
+    'dropout': 0.1,
+    'lambda': 0.1,
+    'k': 3,  # AnomalyTransformer
+    'e_layers': 2
+}
+
+
 
 # Dataset configuration
 DATA_CONFIG = [

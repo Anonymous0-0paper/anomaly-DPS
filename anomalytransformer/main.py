@@ -1,5 +1,5 @@
 import torch
-from utils.time_series_config import TIMESNET_CONFIG, DATA_CONFIG, EXPERIMENT_CONFIG
+from utils.time_series_config import ANOMALY_TRANSFORMER_CONFIG, DATA_CONFIG, EXPERIMENT_CONFIG
 from data_loader import get_data_loader
 from model import AnomalyDetectionPipeline
 from utils.evaluator import Evaluator
@@ -10,6 +10,7 @@ import numpy as np
 import logging
 import sys
 import gc
+
 
 # Configure logging system
 def setup_logger():
@@ -33,6 +34,7 @@ def setup_logger():
     file_handler.setFormatter(console_formatter)
     logger.addHandler(file_handler)
     return logger
+
 
 def run_experiment(logger, dataset_type, dataset_params):
     """
@@ -88,7 +90,7 @@ def run_experiment(logger, dataset_type, dataset_params):
 
     # Initialize evaluator
     evaluator = Evaluator(
-        model_name="TimesNet",
+        model_name="AnomalyTransformer",
         save_plots=EXPERIMENT_CONFIG['save_plots'],
         plot_dir=EXPERIMENT_CONFIG['plot_dir'],
         max_plot_points=EXPERIMENT_CONFIG.get('max_plot_points', 5000)
@@ -117,8 +119,9 @@ def run_experiment(logger, dataset_type, dataset_params):
             orig_train_size = len(train_data)
             orig_test_size = len(test_data)
             logger.info(f"Original data sizes - Train: {orig_train_size}, Test: {orig_test_size}")
+            logger.info(f"Number of features: {train_data.shape[1]}")  # 添加特征数量日志
 
-            # ================= New: Feature Standardization =================
+            # ================= Feature Standardization =================
             logger.info("Applying feature scaling...")
             from sklearn.preprocessing import StandardScaler
 
@@ -156,7 +159,7 @@ def run_experiment(logger, dataset_type, dataset_params):
 
             # Initialize pipeline
             pipeline = AnomalyDetectionPipeline(
-                model_params=TIMESNET_CONFIG,
+                model_params=ANOMALY_TRANSFORMER_CONFIG,
                 device=EXPERIMENT_CONFIG['device']
             )
 
@@ -214,13 +217,14 @@ def run_experiment(logger, dataset_type, dataset_params):
 
     return results
 
+
 def main():
     """Main program"""
     # Set up logging
     logger = setup_logger()
-    logger.info("Starting anomaly detection experiment")
+    logger.info("Starting anomaly detection experiment with AnomalyTransformer")
     logger.info(f"Device: {EXPERIMENT_CONFIG['device']}")
-    logger.info(f"Model config: {TIMESNET_CONFIG}")
+    logger.info(f"Model config: {ANOMALY_TRANSFORMER_CONFIG}")
 
     # Ensure results directory exists
     os.makedirs(os.path.dirname(EXPERIMENT_CONFIG['results_file']), exist_ok=True)
@@ -333,6 +337,7 @@ def main():
     # Display total time taken
     elapsed = time.time() - start_time
     logger.info(f"\nTotal processing time: {elapsed / 60:.2f} minutes")
+
 
 if __name__ == "__main__":
     main()
