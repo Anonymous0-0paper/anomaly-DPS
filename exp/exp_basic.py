@@ -1,6 +1,6 @@
 import os
 import torch
-from models import Autoformer, Transformer, TimesNet
+from models import Autoformer, Transformer, TimesNet, Fourier_Transformer
 
 
 class Exp_Basic(object):
@@ -9,7 +9,8 @@ class Exp_Basic(object):
         self.model_dict = {
             'TimesNet': TimesNet,
             'Autoformer': Autoformer,
-            'Transformer': Transformer
+            'Transformer': Transformer,
+            'Fourier_Transformer':Fourier_Transformer
         }
         if args.model == 'Mamba':
             print('Please make sure you have successfully installed mamba_ssm')

@@ -21,12 +21,12 @@ if __name__ == '__main__':
     parser.add_argument('--is_training', type=int, required=False, default=1, help='status')
     parser.add_argument('--model_id', type=str, required=False, default='test', help='model id')
     parser.add_argument('--model', type=str, required=False, default='Transformer',
-                        help='model name, options: [Autoformer, Transformer, TimesNet]')
+                        help='model name, options: [Autoformer, Transformer, TimesNet, Fourier_Transformer]')
 
     # data loader
-    parser.add_argument('--data', type=str, required=False, default='WADI', help='dataset type')
-    parser.add_argument('--root_path', type=str, default='dataset/wadi/', help='root path of the data file')
-    parser.add_argument('--data_path', type=str, default='WADI_test.npy', help='data file')
+    parser.add_argument('--data', type=str, required=False, default='SMD', help='dataset type')
+    parser.add_argument('--root_path', type=str, default='dataset/smd/', help='root path of the data file')
+    parser.add_argument('--data_path', type=str, default='SMD_test.npy', help='data file')
 
     # parser.add_argument('--data', type=str, required=True, default='ETTh1', help='dataset type')
     # parser.add_argument('--root_path', type=str, default='./data/ETT/', help='root path of the data file')
