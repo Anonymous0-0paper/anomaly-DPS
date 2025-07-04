@@ -68,11 +68,69 @@ The following datasets were used for evaluation:
 - Suitable for high-dimensional, multivariate time-series anomaly detection  
 
 ---
+## Project Structure
 
-## 📚 Coming Soon
+| Top-level Folder/File | Main Function Description | Main Files Contained |
+|-----------------------|---------------------------|----------------------|
+| **checkpoints** | Stores temporary files during model training | - |
+| **data_provider** | Stores data processing programs | `data_loader.py`, `data_factory.py`, `uea.py` |
+| **dataset** | Stores model training data | - |
+| **exp** | Stores time series task training modules (anomaly detection, filling missing values, etc.) | `exp_basic.py`, `exp_anomaly_detection` |
+| **layers** | Stores basic architecture components of the model (encoder/decoder, attention mechanism, embedding layer) | `AutoCorrelation.py`, `Autoformer_EncDec.py`, `Conv_Blocks.py`, `Crossformer_EncDec.py`, `Embed.py`, etc. |
+| **models** | Stores the implementation of time series prediction models | `Autoformer.py`, `TimesNet.py`, `Transformer.py`, etc. |
+| **performance_charts** | Stores training results | - |
+| **scripts** | Stores Shell scripts for automated execution | Multiple `.sh` script files |
+| **utils** | Stores utility functions and auxiliary modules | `masking.py`, `print_args.py`, `tools.py` |
+| **LICENSE** | Copyright declaration file | - |
+| **README.md** | Project documentation | - |
+| **requirements.txt** | Project dependency environment configuration | - |
+| **run.py** | Main program (parameter setting/model training/test entry) | - |
 
-- Training scripts  
-- Model configurations  
-- Evaluation metrics and benchmarks  
-- Documentation  
+---
+## Execution
 
+```bash
+# Clone the repository
+git clone git@github.com\:Anonymous0-0paper/anomaly-DPS.git
+cd anomaly-DPS
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Database Source
+The dataset is stored in the `dataset` folder on [Google Drive](https://drive.google.com/drive/folders/17rV8ahgAC2RDt6m6e2pRmfOIt_NLAvk0) and needs to be transplanted to the project root directory `anomaly-DPS`.
+
+### Script Execution
+All running scripts are located in the `scripts/` directory. Execution example:
+```bash
+sh scripts/anomaly_detection/MSL/Transformer.sh
+```
+
+### Key Model Parameter Descriptio
+The core configuration parameters of `run.py` are as follows:
+
+| Parameter Name   | Parameter Meaning     |
+|-------|------|
+| task_name | 	Task type     |
+| is_training| Whether it is training mode     |
+| root_path | Dataset root directory path     |
+| data_path | 	Data filename     |
+| model_id | Model unique identifier (MSL, SMAP, MSD, SWAT, WADI) |
+| model | Time series model name (Transformer, TimesNets, etc.) |
+| data  | Data processing method |
+| features | Prediction mode (M, S, MS) |
+| seq_len | Historical time step length (encoder input length） |
+| pred_len | Future time step length to be predicted |
+| e_layers | Number of encoder layers |
+| d_layers | Number of decoder layers |
+| enc_in | Encoder input feature dimension |
+| dec_in | Decoder input feature dimension |
+| c_out | Output feature dimension|
+
+
+### Developing Your Own Model
+Follow these steps:
+
+1. Add the model file to the `models` folder.
+2. In the `exp/exp_basic.py` file, include the newly added model in `Exp_Basic.model_dict`.
+3. Create the corresponding `scripts` in the scripts folder. 

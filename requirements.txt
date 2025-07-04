@@ -12,8 +12,3 @@ sympy==1.11.1
 torch==1.7.1
 tqdm==4.64.1
 PyWavelets
-
-patool==1.12
-sktime==0.16.1
-pandas==2.0.0
-reformer-pytorch==1.4.4
