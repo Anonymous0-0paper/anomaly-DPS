@@ -28,22 +28,34 @@ class SpectralFeedForward(nn.Module):
         return ff_output + freq_output
 
 class PositionalEncoding(nn.Module):
-    """Positional Encoding"""
-    def __init__(self, d_model, max_len=5000, dropout=0.1):
+    """Positional Encoding (supports learnable and fixed)"""
+    def __init__(self, d_model, max_len=5000, dropout=0.1, learnable=False):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
-
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() *
-                             (-math.log(10000.0) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
-        self.register_buffer('pe', pe)
+        self.learnable = learnable
+        self.d_model = d_model
+        self.max_len = max_len
+        if learnable:
+            self.pos_embedding = nn.Embedding(max_len, d_model)
+        else:
+            pe = torch.zeros(max_len, d_model)
+            position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+            div_term = torch.exp(torch.arange(0, d_model, 2).float() *
+                                 (-math.log(10000.0) / d_model))
+            pe[:, 0::2] = torch.sin(position * div_term)
+            pe[:, 1::2] = torch.cos(position * div_term)
+            pe = pe.unsqueeze(0).transpose(0, 1)
+            self.register_buffer('pe', pe)
 
     def forward(self, x):
-        x = x + self.pe[:x.size(0), :]
+        if self.learnable:
+            # x: [batch, seq_len, d_model] or [seq_len, batch, d_model]
+            seq_len = x.size(1) if x.dim() == 3 else x.size(0)
+            pos = torch.arange(seq_len, device=x.device).unsqueeze(0)
+            pos_emb = self.pos_embedding(pos)
+            x = x + pos_emb if x.dim() == 3 else x + pos_emb.squeeze(0)
+        else:
+            x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
 class FourierTransformerLayer(nn.Module):
@@ -143,7 +155,10 @@ class FourierAttention(nn.Module):
 
         # Apply mask if provided
         if mask is not None:
-            combined_scores.masked_fill_(mask == 0, -1e9)
+            # Ensure mask is boolean and broadcastable
+            if mask.dtype != torch.bool:
+                mask = mask.bool()
+            combined_scores = combined_scores.masked_fill(~mask, float('-inf'))
 
         # Apply softmax
         attention_weights = F.softmax(combined_scores, dim=-1)

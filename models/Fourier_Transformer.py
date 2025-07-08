@@ -7,23 +7,30 @@ class FourierTransformer(nn.Module):
     """Fourier Transformer main architecture"""
 
     def __init__(self, input_dim, d_model=512, n_heads=8, n_layers=6,
-                 d_ff=2048, n_scales=4, dropout=0.1, max_seq_len=1000):
+                 d_ff=2048, n_scales=4, dropout=0.1, max_seq_len=1000, layerdrop=0.1, pos_learnable=True):
         super(FourierTransformer, self).__init__()
         self.input_dim = input_dim
         self.d_model = d_model
         self.n_layers = n_layers
+        self.layerdrop = layerdrop
 
         # Input projection
-        self.input_projection = nn.Linear(input_dim, d_model)
+        self.input_projection = nn.Sequential(
+            nn.Linear(input_dim, d_model),
+            nn.Dropout(dropout)
+        )
 
-        # Positional encoding
-        self.pos_encoding = PositionalEncoding(d_model, max_seq_len, dropout)
+        # Positional encoding (support learnable)
+        self.pos_encoding = PositionalEncoding(d_model, max_seq_len, dropout, learnable=pos_learnable)
 
         # Transformer layers
         self.layers = nn.ModuleList([
             FourierTransformerLayer(d_model, n_heads, d_ff, n_scales, dropout)
             for _ in range(n_layers)
         ])
+
+        # Output projection with dropout
+        self.output_dropout = nn.Dropout(dropout)
 
         # Parameter initialization
         self._init_parameters()
@@ -40,11 +47,15 @@ class FourierTransformer(nn.Module):
 
         attention_weights = []
 
-        # Through transformer layers
+        # Through transformer layers with LayerDrop
         for layer in self.layers:
+            if self.training and self.layerdrop > 0.0 and torch.rand(1).item() < self.layerdrop:
+                continue  # Skip this layer
             x, attn_weights = layer(x, mask)
             if return_attention:
                 attention_weights.append(attn_weights)
+
+        x = self.output_dropout(x)
 
         # Return output and attention weights (if needed)
         if return_attention:
