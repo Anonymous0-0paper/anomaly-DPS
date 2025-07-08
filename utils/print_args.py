@@ -48,7 +48,9 @@ def print_args(args):
     print()
 
     print("\033[1m" + "GPU" + "\033[0m")
-    print(f'  {"Use GPU:":<20}{args.use_gpu:<20}{"GPU:":<20}{args.gpu:<20}')
+    # print(f'  {"Use GPU:":<20}{args.use_gpu:<20}{"GPU:":<20}{args.gpu:<20}')
+    print(f'  {"GPU:":<20}{args.gpu:<20}')
+
     print(f'  {"Use Multi GPU:":<20}{args.use_multi_gpu:<20}{"Devices:":<20}{args.devices:<20}')
     print()
 
