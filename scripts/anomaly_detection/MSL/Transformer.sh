@@ -14,8 +14,8 @@ python -u run.py \
   --d_model 128 \
   --d_ff 128 \
   --e_layers 3 \
-  --enc_in 55 \
-  --c_out 55 \
+  --enc_in 501 \
+  --c_out 501 \
   --anomaly_ratio 1 \
   --batch_size 64 \
   --train_epochs 10

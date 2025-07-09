@@ -25,6 +25,10 @@ class MSLSegLoader(Dataset):
         print("test:", self.test.shape)
         print("train:", self.train.shape)
         self.fe = TimeSeriesFeatureEngineer()
+        # Print engineered feature shape and output dim for guidance
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[MSLSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
         if self.flag == "train":
@@ -75,6 +79,9 @@ class SMAPSegLoader(Dataset):
         print("test:", self.test.shape)
         print("train:", self.train.shape)
         self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[SMAPSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
 
@@ -124,6 +131,9 @@ class SMDSegLoader(Dataset):
         self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = np.load(os.path.join(root_path, "SMD_test_label.npy"))
         self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[SMDSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
         if self.flag == "train":
@@ -175,6 +185,9 @@ class SWATSegLoader(Dataset):
         print("test:", self.test.shape)
         print("train:", self.train.shape)
         self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[SWATSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
         """
@@ -225,6 +238,9 @@ class WADISegLoader(Dataset):
         self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = np.load(root_path + "/WADI_label.npy")
         self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[WADISegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
 
