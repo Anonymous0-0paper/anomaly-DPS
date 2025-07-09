@@ -66,4 +66,17 @@ class TimeSeriesFeatureEngineer:
             out = torch.from_numpy(out).to(x.device).type_as(x)
         if out.shape[0] == 1:
             out = out[0]
-        return out 
+        return out
+
+    @staticmethod
+    def get_output_dim(input_dim, lags=[1,2,3], add_time_features=False):
+        # input_dim: original number of features
+        stat_feats = 4 * input_dim  # mean, std, min, max
+        lag_feats = len(lags) * input_dim
+        delta_feats = input_dim
+        fft_feats = 6  # 3 real, 3 imag (per feature)
+        freq_feats = fft_feats * input_dim
+        time_feats = 0
+        if add_time_features:
+            time_feats = 2  # hour and day
+        return input_dim + stat_feats + lag_feats + delta_feats + freq_feats + time_feats 

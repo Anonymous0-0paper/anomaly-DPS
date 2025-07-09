@@ -16,8 +16,8 @@ python -u run.py \
   --e_layers 2 \
   --d_ff 128 \
   --dropout 0.1\
-  --enc_in 55 \
-  --c_out 55 \
+  --enc_in 501 \
+  --c_out 501 \
   --anomaly_ratio 1 \
   --batch_size 64 \
   --train_epochs 10
