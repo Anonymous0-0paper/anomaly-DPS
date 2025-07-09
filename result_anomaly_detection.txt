@@ -1,0 +1,9 @@
+anomaly_detection_MSL_Transformer_MSL_ftM_sl100_ll48_pl0_dm128_nh8_el3_dl1_df128_expand2_dc4_fc1_ebtimeF_dtTrue_test_0  
+Accuracy : 0.9512, Precision : 0.8640, Recall : 0.6382, F-score : 0.7341 
+
+anomaly_detection_MSL_Fourier_Transformer_MSL_ftM_sl100_ll48_pl0_dm128_nh4_el2_dl1_df128_expand2_dc4_fc1_ebtimeF_dtTrue_test_0  
+Accuracy : 0.9585, Precision : 0.8842, Recall : 0.6985, F-score : 0.7804 
+
+anomaly_detection_MSL_Fourier_Transformer_MSL_ftM_sl100_ll48_pl0_dm128_nh4_el2_dl1_df128_expand2_dc4_fc1_ebtimeF_dtTrue_test_0  
+Accuracy : 0.9632, Precision : 0.8961, Recall : 0.7364, F-score : 0.8085 
+
