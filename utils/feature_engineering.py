@@ -23,7 +23,7 @@ class TimeSeriesFeatureEngineer:
             x_np = x.detach().cpu().numpy()
         else:
             x_np = x
-        # Handle batch / single sequence
+        # Handle batch or single sequence
         if x_np.ndim == 2:
             x_np = x_np[None, ...]
         batch, seq_len, n_features = x_np.shape
