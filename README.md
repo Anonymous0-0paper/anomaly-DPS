@@ -134,3 +134,30 @@ Follow these steps:
 1. Add the model file to the `models` folder.
 2. In the `exp/exp_basic.py` file, include the newly added model in `Exp_Basic.model_dict`.
 3. Create the corresponding `scripts` in the scripts folder. 
+
+## Run In the Cluster
+
+### Environment Setup
+```shell
+
+git clone https://github.com/Anonymous0-0paper/anomaly-DPS.git
+
+python3 -m venv ~/project/venvs/anomaly-DPS
+
+source ~/project/venvs/anomaly-DPS/bin/activate
+
+pip install --upgrade pip
+
+pip install -r requirements.txt
+```
+
+### Model Execution
+`run_cluster.sh` is a cluster running script that supports the parallel execution of multiple models on the same dataset, ensuring that the number of available nodes is greater than the number of scripts.
+```shell
+
+chmod +x run_cluster.sh
+
+./run_cluster.sh
+```
+### Logs
+Model execution logs are stored in `anomaly-DPS/logs`, GPU memory records are stored in `anomaly-DPS/logs/dataset_name/gpu_mem`.
