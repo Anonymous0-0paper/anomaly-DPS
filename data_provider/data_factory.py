@@ -1,4 +1,6 @@
 from data_provider.data_loader import MSLSegLoader, SMAPSegLoader, SMDSegLoader, SWATSegLoader, WADISegLoader
+# using feature_FE
+# from data_provider.data_loader_FE import MSLSegLoader, SMAPSegLoader, SMDSegLoader, SWATSegLoader, WADISegLoader
 
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
