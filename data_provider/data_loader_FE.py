@@ -3,6 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from sklearn.preprocessing import StandardScaler
 import warnings
+from utils.feature_engineering import TimeSeriesFeatureEngineer
 
 warnings.filterwarnings('ignore')
 
@@ -23,6 +24,11 @@ class MSLSegLoader(Dataset):
         self.test_labels = np.load(os.path.join(root_path, "MSL_test_label.npy"))
         print("test:", self.test.shape)
         print("train:", self.train.shape)
+        self.fe = TimeSeriesFeatureEngineer()
+        # Print engineered feature shape and output dim for guidance
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[MSLSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
         if self.flag == "train":
@@ -37,16 +43,22 @@ class MSLSegLoader(Dataset):
     def __getitem__(self, index):
         index = index * self.step
         if self.flag == "train":
-            return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.train[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
-            return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.val[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
-            return np.float32(self.test[index:index + self.win_size]), np.float32(
-                self.test_labels[index:index + self.win_size])
+            x = np.float32(self.test[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index:index + self.win_size])
         else:
-            return np.float32(self.test[
-                              index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
-                self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = np.float32(self.test[
+                index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 
 class SMAPSegLoader(Dataset):
@@ -66,6 +78,10 @@ class SMAPSegLoader(Dataset):
         self.test_labels = np.load(os.path.join(root_path, "SMAP_test_label.npy"))
         print("test:", self.test.shape)
         print("train:", self.train.shape)
+        self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[SMAPSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
 
@@ -81,16 +97,22 @@ class SMAPSegLoader(Dataset):
     def __getitem__(self, index):
         index = index * self.step
         if self.flag == "train":
-            return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.train[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
-            return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.val[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
-            return np.float32(self.test[index:index + self.win_size]), np.float32(
-                self.test_labels[index:index + self.win_size])
+            x = np.float32(self.test[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index:index + self.win_size])
         else:
-            return np.float32(self.test[
-                              index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
-                self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = np.float32(self.test[
+                index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 
 class SMDSegLoader(Dataset):
@@ -108,6 +130,10 @@ class SMDSegLoader(Dataset):
         data_len = len(self.train)
         self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = np.load(os.path.join(root_path, "SMD_test_label.npy"))
+        self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[SMDSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
         if self.flag == "train":
@@ -122,16 +148,22 @@ class SMDSegLoader(Dataset):
     def __getitem__(self, index):
         index = index * self.step
         if self.flag == "train":
-            return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.train[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
-            return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.val[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
-            return np.float32(self.test[index:index + self.win_size]), np.float32(
-                self.test_labels[index:index + self.win_size])
+            x = np.float32(self.test[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index:index + self.win_size])
         else:
-            return np.float32(self.test[
-                              index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
-                self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = np.float32(self.test[
+                index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 
 class SWATSegLoader(Dataset):
@@ -152,6 +184,10 @@ class SWATSegLoader(Dataset):
         self.test_labels = np.load(os.path.join(root_path, "SWaT_test_label.npy"))
         print("test:", self.test.shape)
         print("train:", self.train.shape)
+        self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[SWATSegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
         """
@@ -169,16 +205,22 @@ class SWATSegLoader(Dataset):
     def __getitem__(self, index):
         index = index * self.step
         if self.flag == "train":
-            return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.train[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
-            return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.val[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
-            return np.float32(self.test[index:index + self.win_size]), np.float32(
-                self.test_labels[index:index + self.win_size])
+            x = np.float32(self.test[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index:index + self.win_size])
         else:
-            return np.float32(self.test[
-                              index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
-                self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = np.float32(self.test[
+                index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
 
 class WADISegLoader(Dataset):
     def __init__(self, args, root_path, win_size, step=1, flag="train"):
@@ -195,6 +237,10 @@ class WADISegLoader(Dataset):
         data_len = len(self.train)
         self.val = self.train[(int)(data_len * 0.8):]
         self.test_labels = np.load(root_path + "/WADI_label.npy")
+        self.fe = TimeSeriesFeatureEngineer()
+        test_x = np.float32(self.train[:self.win_size])
+        test_x_aug = self.fe.transform(test_x)
+        print(f"[WADISegLoader] Engineered feature shape: {test_x_aug.shape}, output_dim: {test_x_aug.shape[-1]}")
 
     def __len__(self):
 
@@ -210,13 +256,19 @@ class WADISegLoader(Dataset):
     def __getitem__(self, index):
         index = index * self.step
         if self.flag == "train":
-            return np.float32(self.train[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.train[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'val'):
-            return np.float32(self.val[index:index + self.win_size]), np.float32(self.test_labels[0:self.win_size])
+            x = np.float32(self.val[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[0:self.win_size])
         elif (self.flag == 'test'):
-            return np.float32(self.test[index:index + self.win_size]), np.float32(
-                self.test_labels[index:index + self.win_size])
+            x = np.float32(self.test[index:index + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index:index + self.win_size])
         else:
-            return np.float32(self.test[
-                              index // self.step * self.win_size:index // self.step * self.win_size + self.win_size]), np.float32(
-                self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = np.float32(self.test[
+                index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
+            x = self.fe.transform(x)
+            return x, np.float32(self.test_labels[index // self.step * self.win_size:index // self.step * self.win_size + self.win_size])
