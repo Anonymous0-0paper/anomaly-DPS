@@ -1,6 +1,6 @@
 import os
 import torch
-from models import Autoformer, Transformer, TimesNet, Fourier_Transformer, TranAD, OmniAnomaly, DACAD, CATCH
+from models import Autoformer, Transformer, TimesNet, Fourier_Transformer, TranAD, OmniAnomaly, DACAD, CATCH, ModernTCN
 
 
 class Exp_Basic(object):
@@ -14,7 +14,8 @@ class Exp_Basic(object):
             'TranAD': TranAD,
             'OmniAnomaly': OmniAnomaly,
             'DACAD': DACAD,
-            'CATCH' : CATCH
+            'CATCH' : CATCH,
+            'ModernTCN' : ModernTCN
         }
         if args.model == 'Mamba':
             print('Please make sure you have successfully installed mamba_ssm')
