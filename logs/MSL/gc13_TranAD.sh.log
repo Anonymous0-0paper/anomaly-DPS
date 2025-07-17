@@ -1,0 +1,232 @@
+Python路径:  /home/zhengxin.guo/project/venvs/anomaly-DPS/bin/python
+Python版本:  Python 3.12.3
+=== 任务开始 ===
+脚本路径: scripts/anomaly_detection/MSL/TranAD.sh
+GPU available: NVIDIA GeForce RTX 2070 SUPER
+Total GPUs: 1
+Primary GPU: cuda:0
+Args in experiment:
+[1mBasic Config[0m
+  Task Name:          anomaly_detection   Is Training:        1                   
+  Model ID:           MSL                 Model:              TranAD              
+
+[1mData Loader[0m
+  Data:               MSL                 Root Path:          ./dataset/MSL       
+  Data Path:          MSL_test.npy        Features:           M                   
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints/      
+
+[1mAnomaly Detection Task[0m
+  Anomaly Ratio:      1.0                 
+
+[1mModel Parameters[0m
+  Top k:              3                   Num Kernels:        6                   
+  Enc In:             55                  Dec In:             7                   
+  C Out:              55                  d model:            16                  
+  n heads:            8                   e layers:           2                   
+  d layers:           1                   d FF:               16                  
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+
+[1mRun Parameters[0m
+  Num Workers:        10                  Itr:                1                   
+  Train Epochs:       50                  Batch Size:         128                 
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              type1               Use Amp:            0                   
+
+[1mGPU[0m
+  GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+[1mDe-stationary Projector Params[0m
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Use GPU: cuda:0
+>>>>>>> start training : anomaly_detection_MSL_TranAD_MSL_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 >>>>>>>>>>>>>>>>>>
+test: (73729, 55)
+train: (58317, 55)
+train 58218
+test: (73729, 55)
+train: (58317, 55)
+val 11565
+test: (73729, 55)
+train: (58317, 55)
+test 73630
+	iters: 100, epoch: 1 | loss: 0.4923171
+	speed: 0.0533s/iter; left time: 1207.7947s
+	iters: 200, epoch: 1 | loss: 0.5037063
+	speed: 0.0426s/iter; left time: 960.6262s
+	iters: 300, epoch: 1 | loss: 0.7238042
+	speed: 0.0429s/iter; left time: 962.3389s
+	iters: 400, epoch: 1 | loss: 0.4946057
+	speed: 0.0427s/iter; left time: 954.4253s
+Epoch: 1 cost time: 20.54336953163147
+Epoch: 1, Steps: 455 | Train Loss: 0.5683491 Vali Loss: 0.4927833 Test Loss: 1.4325407
+Validation loss decreased (inf --> 0.492783).  Saving model ...
+Updating learning rate to 0.0001
+	iters: 100, epoch: 2 | loss: 0.5984935
+	speed: 0.1787s/iter; left time: 3967.2459s
+	iters: 200, epoch: 2 | loss: 0.6160260
+	speed: 0.0429s/iter; left time: 948.4339s
+	iters: 300, epoch: 2 | loss: 0.5483918
+	speed: 0.0430s/iter; left time: 946.8414s
+	iters: 400, epoch: 2 | loss: 0.3830518
+	speed: 0.0436s/iter; left time: 954.5770s
+Epoch: 2 cost time: 20.63403844833374
+Epoch: 2, Steps: 455 | Train Loss: 0.5257857 Vali Loss: 0.4357930 Test Loss: 1.3325624
+Validation loss decreased (0.492783 --> 0.435793).  Saving model ...
+Updating learning rate to 5e-05
+	iters: 100, epoch: 3 | loss: 0.3121143
+	speed: 0.2014s/iter; left time: 4379.4367s
+	iters: 200, epoch: 3 | loss: 0.7145358
+	speed: 0.0433s/iter; left time: 937.0179s
+	iters: 300, epoch: 3 | loss: 0.4403830
+	speed: 0.0433s/iter; left time: 933.7227s
+	iters: 400, epoch: 3 | loss: 0.5563236
+	speed: 0.0434s/iter; left time: 931.5263s
+Epoch: 3 cost time: 20.689119815826416
+Epoch: 3, Steps: 455 | Train Loss: 0.4882017 Vali Loss: 0.4090317 Test Loss: 1.2899702
+Validation loss decreased (0.435793 --> 0.409032).  Saving model ...
+Updating learning rate to 2.5e-05
+	iters: 100, epoch: 4 | loss: 0.4932899
+	speed: 0.2026s/iter; left time: 4311.7796s
+	iters: 200, epoch: 4 | loss: 0.3868458
+	speed: 0.0433s/iter; left time: 918.3051s
+	iters: 300, epoch: 4 | loss: 0.3846000
+	speed: 0.0436s/iter; left time: 918.4290s
+	iters: 400, epoch: 4 | loss: 0.4312030
+	speed: 0.0439s/iter; left time: 920.8775s
+Epoch: 4 cost time: 20.779120922088623
+Epoch: 4, Steps: 455 | Train Loss: 0.4698947 Vali Loss: 0.3929514 Test Loss: 1.2705145
+Validation loss decreased (0.409032 --> 0.392951).  Saving model ...
+Updating learning rate to 1.25e-05
+	iters: 100, epoch: 5 | loss: 0.4165342
+	speed: 0.2042s/iter; left time: 4253.7108s
+	iters: 200, epoch: 5 | loss: 0.4590951
+	speed: 0.0436s/iter; left time: 904.6684s
+	iters: 300, epoch: 5 | loss: 0.5489482
+	speed: 0.0438s/iter; left time: 903.2330s
+	iters: 400, epoch: 5 | loss: 0.5308694
+	speed: 0.0435s/iter; left time: 892.1634s
+Epoch: 5 cost time: 20.850116729736328
+Epoch: 5, Steps: 455 | Train Loss: 0.4613246 Vali Loss: 0.3861346 Test Loss: 1.2615470
+Validation loss decreased (0.392951 --> 0.386135).  Saving model ...
+Updating learning rate to 6.25e-06
+	iters: 100, epoch: 6 | loss: 0.6430598
+	speed: 0.2049s/iter; left time: 4174.6527s
+	iters: 200, epoch: 6 | loss: 0.2812990
+	speed: 0.0435s/iter; left time: 881.5151s
+	iters: 300, epoch: 6 | loss: 0.3776548
+	speed: 0.0433s/iter; left time: 874.5258s
+	iters: 400, epoch: 6 | loss: 0.4400323
+	speed: 0.0439s/iter; left time: 881.7147s
+Epoch: 6 cost time: 20.88339400291443
+Epoch: 6, Steps: 455 | Train Loss: 0.4570598 Vali Loss: 0.3840446 Test Loss: 1.2572113
+Validation loss decreased (0.386135 --> 0.384045).  Saving model ...
+Updating learning rate to 3.125e-06
+	iters: 100, epoch: 7 | loss: 0.3765607
+	speed: 0.2121s/iter; left time: 4225.5243s
+	iters: 200, epoch: 7 | loss: 0.4511114
+	speed: 0.0437s/iter; left time: 865.2329s
+	iters: 300, epoch: 7 | loss: 0.5099940
+	speed: 0.0435s/iter; left time: 858.7168s
+	iters: 400, epoch: 7 | loss: 0.3217514
+	speed: 0.0436s/iter; left time: 856.0426s
+Epoch: 7 cost time: 21.16005301475525
+Epoch: 7, Steps: 455 | Train Loss: 0.4551124 Vali Loss: 0.3815958 Test Loss: 1.2551253
+Validation loss decreased (0.384045 --> 0.381596).  Saving model ...
+Updating learning rate to 1.5625e-06
+	iters: 100, epoch: 8 | loss: 0.4995285
+	speed: 0.2089s/iter; left time: 4066.3062s
+	iters: 200, epoch: 8 | loss: 0.4443202
+	speed: 0.0442s/iter; left time: 856.1847s
+	iters: 300, epoch: 8 | loss: 0.4984105
+	speed: 0.0439s/iter; left time: 845.7636s
+	iters: 400, epoch: 8 | loss: 0.4052168
+	speed: 0.0439s/iter; left time: 840.9627s
+Epoch: 8 cost time: 21.125991582870483
+Epoch: 8, Steps: 455 | Train Loss: 0.4542079 Vali Loss: 0.3816285 Test Loss: 1.2540870
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 7.8125e-07
+	iters: 100, epoch: 9 | loss: 0.3459841
+	speed: 0.2080s/iter; left time: 3953.6993s
+	iters: 200, epoch: 9 | loss: 0.4923501
+	speed: 0.0439s/iter; left time: 829.8264s
+	iters: 300, epoch: 9 | loss: 0.7181737
+	speed: 0.0441s/iter; left time: 828.6794s
+	iters: 400, epoch: 9 | loss: 0.5529695
+	speed: 0.0439s/iter; left time: 822.3033s
+Epoch: 9 cost time: 21.045552968978882
+Epoch: 9, Steps: 455 | Train Loss: 0.4535195 Vali Loss: 0.3821890 Test Loss: 1.2536068
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 3.90625e-07
+	iters: 100, epoch: 10 | loss: 0.5606594
+	speed: 0.2083s/iter; left time: 3866.0316s
+	iters: 200, epoch: 10 | loss: 0.4457023
+	speed: 0.0439s/iter; left time: 809.5002s
+	iters: 300, epoch: 10 | loss: 0.5327515
+	speed: 0.0439s/iter; left time: 805.1630s
+	iters: 400, epoch: 10 | loss: 0.5233945
+	speed: 0.0441s/iter; left time: 805.8913s
+Epoch: 10 cost time: 21.06577157974243
+Epoch: 10, Steps: 455 | Train Loss: 0.4533691 Vali Loss: 0.3800435 Test Loss: 1.2533619
+Validation loss decreased (0.381596 --> 0.380043).  Saving model ...
+Updating learning rate to 1.953125e-07
+	iters: 100, epoch: 11 | loss: 0.5115060
+	speed: 0.2072s/iter; left time: 3749.7899s
+	iters: 200, epoch: 11 | loss: 0.4464769
+	speed: 0.0440s/iter; left time: 792.7000s
+	iters: 300, epoch: 11 | loss: 0.3918457
+	speed: 0.0441s/iter; left time: 789.8588s
+	iters: 400, epoch: 11 | loss: 0.3637657
+	speed: 0.0437s/iter; left time: 778.4493s
+Epoch: 11 cost time: 20.810788869857788
+Epoch: 11, Steps: 455 | Train Loss: 0.4530928 Vali Loss: 0.3806253 Test Loss: 1.2532345
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 9.765625e-08
+	iters: 100, epoch: 12 | loss: 0.3653194
+	speed: 0.2073s/iter; left time: 3657.6875s
+	iters: 200, epoch: 12 | loss: 0.3394333
+	speed: 0.0441s/iter; left time: 773.7934s
+	iters: 300, epoch: 12 | loss: 0.5095520
+	speed: 0.0441s/iter; left time: 769.4174s
+	iters: 400, epoch: 12 | loss: 0.4027318
+	speed: 0.0440s/iter; left time: 762.4715s
+Epoch: 12 cost time: 21.202828884124756
+Epoch: 12, Steps: 455 | Train Loss: 0.4530229 Vali Loss: 0.3812002 Test Loss: 1.2531664
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 4.8828125e-08
+	iters: 100, epoch: 13 | loss: 0.4845095
+	speed: 0.2075s/iter; left time: 3567.4527s
+	iters: 200, epoch: 13 | loss: 0.4705396
+	speed: 0.0439s/iter; left time: 750.8887s
+	iters: 300, epoch: 13 | loss: 0.2938958
+	speed: 0.0442s/iter; left time: 750.7492s
+	iters: 400, epoch: 13 | loss: 0.4625530
+	speed: 0.0443s/iter; left time: 747.6356s
+Epoch: 13 cost time: 21.08788251876831
+Epoch: 13, Steps: 455 | Train Loss: 0.4532418 Vali Loss: 0.3805206 Test Loss: 1.2531346
+EarlyStopping counter: 3 out of 3
+Early stopping
+>>>>>>> testing : anomaly_detection_MSL_TranAD_MSL_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 <<<<<<<<<<<<<<<<<<<<<<<<<
+test: (73729, 55)
+train: (58317, 55)
+test 73630
+test: (73729, 55)
+train: (58317, 55)
+train 58218
+Threshold : 8.323099
+pred:    (7363000,)
+gt:      (7363000,)
+pred:  (7363000,)
+gt:    (7363000,)
+Accuracy : 0.9642, Precision : 0.8916, Recall : 0.7521, F-score : 0.8160 
+
+real	7m46.712s
+user	8m55.449s
+sys	6m56.598s
+=== 任务结束 ===
+退出状态: 0
+总耗时: 467 秒

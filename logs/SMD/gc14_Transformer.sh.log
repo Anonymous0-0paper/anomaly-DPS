@@ -1,0 +1,106 @@
+Python路径:  /home/zhengxin.guo/project/venvs/anomaly-DPS/bin/python
+Python版本:  Python 3.12.3
+=== 任务开始 ===
+脚本路径: scripts/anomaly_detection/SMD/Transformer.sh
+GPU available: NVIDIA GeForce RTX 2070 SUPER
+Total GPUs: 1
+Primary GPU: cuda:0
+Args in experiment:
+[1mBasic Config[0m
+  Task Name:          anomaly_detection   Is Training:        1                   
+  Model ID:           SMD                 Model:              Transformer         
+
+[1mData Loader[0m
+  Data:               SMD                 Root Path:          ./dataset/SMD       
+  Data Path:          SMD_test.npy        Features:           M                   
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints/      
+
+[1mAnomaly Detection Task[0m
+  Anomaly Ratio:      0.5                 
+
+[1mModel Parameters[0m
+  Top k:              5                   Num Kernels:        6                   
+  Enc In:             38                  Dec In:             7                   
+  C Out:              38                  d model:            16                  
+  n heads:            8                   e layers:           2                   
+  d layers:           1                   d FF:               16                  
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+
+[1mRun Parameters[0m
+  Num Workers:        10                  Itr:                1                   
+  Train Epochs:       50                  Batch Size:         128                 
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              type1               Use Amp:            0                   
+
+[1mGPU[0m
+  GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+[1mDe-stationary Projector Params[0m
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Use GPU: cuda:0
+>>>>>>> start training : anomaly_detection_SMD_Transformer_SMD_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 >>>>>>>>>>>>>>>>>>
+train 7084
+val 1416
+test 7084
+Epoch: 1 cost time: 1.7958416938781738
+Epoch: 1, Steps: 56 | Train Loss: 1.1969811 Vali Loss: 0.7924910 Test Loss: 2.1045411
+Validation loss decreased (inf --> 0.792491).  Saving model ...
+Updating learning rate to 0.0001
+Epoch: 2 cost time: 1.1894338130950928
+Epoch: 2, Steps: 56 | Train Loss: 1.0895547 Vali Loss: 0.7051427 Test Loss: 2.0003798
+Validation loss decreased (0.792491 --> 0.705143).  Saving model ...
+Updating learning rate to 5e-05
+Epoch: 3 cost time: 1.1669940948486328
+Epoch: 3, Steps: 56 | Train Loss: 1.0263791 Vali Loss: 0.6634648 Test Loss: 1.9563372
+Validation loss decreased (0.705143 --> 0.663465).  Saving model ...
+Updating learning rate to 2.5e-05
+Epoch: 4 cost time: 1.1835227012634277
+Epoch: 4, Steps: 56 | Train Loss: 0.9932856 Vali Loss: 0.6411316 Test Loss: 1.9358302
+Validation loss decreased (0.663465 --> 0.641132).  Saving model ...
+Updating learning rate to 1.25e-05
+Epoch: 5 cost time: 1.1777756214141846
+Epoch: 5, Steps: 56 | Train Loss: 0.9774122 Vali Loss: 0.6163663 Test Loss: 1.9259107
+Validation loss decreased (0.641132 --> 0.616366).  Saving model ...
+Updating learning rate to 6.25e-06
+Epoch: 6 cost time: 1.1097326278686523
+Epoch: 6, Steps: 56 | Train Loss: 0.9697092 Vali Loss: 0.6220304 Test Loss: 1.9209837
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 3.125e-06
+Epoch: 7 cost time: 1.238673210144043
+Epoch: 7, Steps: 56 | Train Loss: 0.9746045 Vali Loss: 0.6105632 Test Loss: 1.9185230
+Validation loss decreased (0.616366 --> 0.610563).  Saving model ...
+Updating learning rate to 1.5625e-06
+Epoch: 8 cost time: 1.1644093990325928
+Epoch: 8, Steps: 56 | Train Loss: 0.9663873 Vali Loss: 0.6113679 Test Loss: 1.9172903
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 7.8125e-07
+Epoch: 9 cost time: 1.1535120010375977
+Epoch: 9, Steps: 56 | Train Loss: 0.9665858 Vali Loss: 0.6264224 Test Loss: 1.9166651
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 3.90625e-07
+Epoch: 10 cost time: 1.1857163906097412
+Epoch: 10, Steps: 56 | Train Loss: 0.9638317 Vali Loss: 0.6167279 Test Loss: 1.9163513
+EarlyStopping counter: 3 out of 3
+Early stopping
+>>>>>>> testing : anomaly_detection_SMD_Transformer_SMD_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 <<<<<<<<<<<<<<<<<<<<<<<<<
+test 7084
+train 7084
+Threshold : 13.8325615
+pred:    (708400,)
+gt:      (708400,)
+pred:  (708400,)
+gt:    (708400,)
+Accuracy : 0.9781, Precision : 0.7845, Recall : 0.6525, F-score : 0.7124 
+
+real	0m45.336s
+user	0m34.741s
+sys	0m51.429s
+=== 任务结束 ===
+退出状态: 0
+总耗时: 45 秒

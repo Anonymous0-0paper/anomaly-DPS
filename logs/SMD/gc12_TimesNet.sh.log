@@ -1,0 +1,102 @@
+Python路径:  /home/zhengxin.guo/project/venvs/anomaly-DPS/bin/python
+Python版本:  Python 3.12.3
+=== 任务开始 ===
+脚本路径: scripts/anomaly_detection/SMD/TimesNet.sh
+GPU available: NVIDIA GeForce RTX 2070 SUPER
+Total GPUs: 1
+Primary GPU: cuda:0
+Args in experiment:
+[1mBasic Config[0m
+  Task Name:          anomaly_detection   Is Training:        1                   
+  Model ID:           SMD                 Model:              TimesNet            
+
+[1mData Loader[0m
+  Data:               SMD                 Root Path:          ./dataset/SMD       
+  Data Path:          SMD_test.npy        Features:           M                   
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints/      
+
+[1mAnomaly Detection Task[0m
+  Anomaly Ratio:      0.5                 
+
+[1mModel Parameters[0m
+  Top k:              5                   Num Kernels:        6                   
+  Enc In:             38                  Dec In:             7                   
+  C Out:              38                  d model:            16                  
+  n heads:            8                   e layers:           2                   
+  d layers:           1                   d FF:               16                  
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+
+[1mRun Parameters[0m
+  Num Workers:        10                  Itr:                1                   
+  Train Epochs:       50                  Batch Size:         128                 
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              type1               Use Amp:            0                   
+
+[1mGPU[0m
+  GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+[1mDe-stationary Projector Params[0m
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Use GPU: cuda:0
+>>>>>>> start training : anomaly_detection_SMD_TimesNet_SMD_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 >>>>>>>>>>>>>>>>>>
+train 7084
+val 1416
+test 7084
+Epoch: 1 cost time: 6.672596454620361
+Epoch: 1, Steps: 56 | Train Loss: 0.3450302 Vali Loss: 0.1738938 Test Loss: 1.0133003
+Validation loss decreased (inf --> 0.173894).  Saving model ...
+Updating learning rate to 0.0001
+Epoch: 2 cost time: 5.785712718963623
+Epoch: 2, Steps: 56 | Train Loss: 0.3259497 Vali Loss: 0.1681404 Test Loss: 0.9653670
+Validation loss decreased (0.173894 --> 0.168140).  Saving model ...
+Updating learning rate to 5e-05
+Epoch: 3 cost time: 5.810702800750732
+Epoch: 3, Steps: 56 | Train Loss: 0.3116233 Vali Loss: 0.1703358 Test Loss: 0.9435198
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 2.5e-05
+Epoch: 4 cost time: 5.83310604095459
+Epoch: 4, Steps: 56 | Train Loss: 0.3077062 Vali Loss: 0.1670996 Test Loss: 0.9326445
+Validation loss decreased (0.168140 --> 0.167100).  Saving model ...
+Updating learning rate to 1.25e-05
+Epoch: 5 cost time: 5.852544069290161
+Epoch: 5, Steps: 56 | Train Loss: 0.3048378 Vali Loss: 0.1654518 Test Loss: 0.9274222
+Validation loss decreased (0.167100 --> 0.165452).  Saving model ...
+Updating learning rate to 6.25e-06
+Epoch: 6 cost time: 5.849355936050415
+Epoch: 6, Steps: 56 | Train Loss: 0.3005286 Vali Loss: 0.1541956 Test Loss: 0.9246249
+Validation loss decreased (0.165452 --> 0.154196).  Saving model ...
+Updating learning rate to 3.125e-06
+Epoch: 7 cost time: 5.853379964828491
+Epoch: 7, Steps: 56 | Train Loss: 0.3003357 Vali Loss: 0.1611278 Test Loss: 0.9233678
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 1.5625e-06
+Epoch: 8 cost time: 5.875925302505493
+Epoch: 8, Steps: 56 | Train Loss: 0.3057256 Vali Loss: 0.1662855 Test Loss: 0.9227152
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 7.8125e-07
+Epoch: 9 cost time: 5.88621711730957
+Epoch: 9, Steps: 56 | Train Loss: 0.2995107 Vali Loss: 0.1562587 Test Loss: 0.9223667
+EarlyStopping counter: 3 out of 3
+Early stopping
+>>>>>>> testing : anomaly_detection_SMD_TimesNet_SMD_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 <<<<<<<<<<<<<<<<<<<<<<<<<
+test 7084
+train 7084
+Threshold : 6.2874393
+pred:    (708400,)
+gt:      (708400,)
+pred:  (708400,)
+gt:    (708400,)
+Accuracy : 0.9863, Precision : 0.8811, Recall : 0.7753, F-score : 0.8248 
+
+real	1m50.911s
+user	1m55.833s
+sys	1m11.390s
+=== 任务结束 ===
+退出状态: 0
+总耗时: 111 秒

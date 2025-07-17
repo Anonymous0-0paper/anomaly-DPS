@@ -1,0 +1,8 @@
+Model,Accuracy,Precision,Recall,F-score,Train Time (s)
+Autoformer,0.9357,0.8981,0.5607,0.6904,1147
+DACAD,0.9348,0.8987,0.5528,0.6845,857
+Fourier_Transformer,0.9363,0.9002,0.5648,0.6941,3619
+OmniAnomaly,0.9359,0.9101,0.5532,0.6881,629
+TimesNet,0.9349,0.8987,0.5539,0.6854,2865
+TranAD,0.9348,0.8983,0.5533,0.6848,1410
+Transformer,0.9354,0.8972,0.5592,0.6889,700

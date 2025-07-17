@@ -1,0 +1,122 @@
+Python路径:  /home/zhengxin.guo/project/venvs/anomaly-DPS/bin/python
+Python版本:  Python 3.12.3
+=== 任务开始 ===
+脚本路径: scripts/anomaly_detection/SMD/OmniAnomaly.sh
+GPU available: NVIDIA GeForce RTX 2070 SUPER
+Total GPUs: 1
+Primary GPU: cuda:0
+Args in experiment:
+[1mBasic Config[0m
+  Task Name:          anomaly_detection   Is Training:        1                   
+  Model ID:           SMD                 Model:              OmniAnomaly         
+
+[1mData Loader[0m
+  Data:               SMD                 Root Path:          ./dataset/SMD       
+  Data Path:          SMD_test.npy        Features:           M                   
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints/      
+
+[1mAnomaly Detection Task[0m
+  Anomaly Ratio:      0.5                 
+
+[1mModel Parameters[0m
+  Top k:              5                   Num Kernels:        6                   
+  Enc In:             38                  Dec In:             7                   
+  C Out:              38                  d model:            16                  
+  n heads:            8                   e layers:           2                   
+  d layers:           1                   d FF:               16                  
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+
+[1mRun Parameters[0m
+  Num Workers:        10                  Itr:                1                   
+  Train Epochs:       50                  Batch Size:         128                 
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              type1               Use Amp:            0                   
+
+[1mGPU[0m
+  GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+[1mDe-stationary Projector Params[0m
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Use GPU: cuda:0
+>>>>>>> start training : anomaly_detection_SMD_OmniAnomaly_SMD_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 >>>>>>>>>>>>>>>>>>
+train 7084
+val 1416
+test 7084
+Epoch: 1 cost time: 1.3950474262237549
+Epoch: 1, Steps: 56 | Train Loss: 1.1150077 Vali Loss: 0.5784579 Test Loss: 2.1773806
+Validation loss decreased (inf --> 0.578458).  Saving model ...
+Updating learning rate to 0.0001
+Epoch: 2 cost time: 0.87160325050354
+Epoch: 2, Steps: 56 | Train Loss: 1.0397112 Vali Loss: 0.5545526 Test Loss: 2.0920355
+Validation loss decreased (0.578458 --> 0.554553).  Saving model ...
+Updating learning rate to 5e-05
+Epoch: 3 cost time: 0.8591303825378418
+Epoch: 3, Steps: 56 | Train Loss: 0.9878379 Vali Loss: 0.5454327 Test Loss: 2.0540137
+Validation loss decreased (0.554553 --> 0.545433).  Saving model ...
+Updating learning rate to 2.5e-05
+Epoch: 4 cost time: 0.8532285690307617
+Epoch: 4, Steps: 56 | Train Loss: 0.9707958 Vali Loss: 0.5326685 Test Loss: 2.0358880
+Validation loss decreased (0.545433 --> 0.532669).  Saving model ...
+Updating learning rate to 1.25e-05
+Epoch: 5 cost time: 0.8633825778961182
+Epoch: 5, Steps: 56 | Train Loss: 0.9543756 Vali Loss: 0.5308511 Test Loss: 2.0266335
+Validation loss decreased (0.532669 --> 0.530851).  Saving model ...
+Updating learning rate to 6.25e-06
+Epoch: 6 cost time: 0.8691608905792236
+Epoch: 6, Steps: 56 | Train Loss: 0.9480304 Vali Loss: 0.5284503 Test Loss: 2.0214143
+Validation loss decreased (0.530851 --> 0.528450).  Saving model ...
+Updating learning rate to 3.125e-06
+Epoch: 7 cost time: 0.8701364994049072
+Epoch: 7, Steps: 56 | Train Loss: 0.9515833 Vali Loss: 0.5261475 Test Loss: 2.0201085
+Validation loss decreased (0.528450 --> 0.526148).  Saving model ...
+Updating learning rate to 1.5625e-06
+Epoch: 8 cost time: 0.8597803115844727
+Epoch: 8, Steps: 56 | Train Loss: 0.9448378 Vali Loss: 0.5232058 Test Loss: 2.0184548
+Validation loss decreased (0.526148 --> 0.523206).  Saving model ...
+Updating learning rate to 7.8125e-07
+Epoch: 9 cost time: 0.8351278305053711
+Epoch: 9, Steps: 56 | Train Loss: 0.9413549 Vali Loss: 0.5259891 Test Loss: 2.0180070
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 3.90625e-07
+Epoch: 10 cost time: 0.83915114402771
+Epoch: 10, Steps: 56 | Train Loss: 0.9421714 Vali Loss: 0.5420097 Test Loss: 2.0173848
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 1.953125e-07
+Epoch: 11 cost time: 0.8429510593414307
+Epoch: 11, Steps: 56 | Train Loss: 0.9412200 Vali Loss: 0.5151423 Test Loss: 2.0176890
+Validation loss decreased (0.523206 --> 0.515142).  Saving model ...
+Updating learning rate to 9.765625e-08
+Epoch: 12 cost time: 0.8609151840209961
+Epoch: 12, Steps: 56 | Train Loss: 0.9401612 Vali Loss: 0.5232735 Test Loss: 2.0174544
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 4.8828125e-08
+Epoch: 13 cost time: 0.858957052230835
+Epoch: 13, Steps: 56 | Train Loss: 0.9419418 Vali Loss: 0.5202073 Test Loss: 2.0173759
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 2.44140625e-08
+Epoch: 14 cost time: 0.8674662113189697
+Epoch: 14, Steps: 56 | Train Loss: 0.9408692 Vali Loss: 0.5460215 Test Loss: 2.0181942
+EarlyStopping counter: 3 out of 3
+Early stopping
+>>>>>>> testing : anomaly_detection_SMD_OmniAnomaly_SMD_ftM_sl100_ll48_pl0_dm16_nh8_el2_dl1_df16_expand2_dc4_fc1_ebtimeF_dtTrue_test_0 <<<<<<<<<<<<<<<<<<<<<<<<<
+test 7084
+train 7084
+Threshold : 16.14209
+pred:    (708400,)
+gt:      (708400,)
+pred:  (708400,)
+gt:    (708400,)
+Accuracy : 0.9780, Precision : 0.7833, Recall : 0.6506, F-score : 0.7108 
+
+real	0m46.365s
+user	0m36.243s
+sys	1m3.526s
+=== 任务结束 ===
+退出状态: 0
+总耗时: 46 秒
