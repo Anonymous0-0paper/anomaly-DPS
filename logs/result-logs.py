@@ -17,7 +17,7 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "analysis_results")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # 配置数据集和模型
-DATASETS = ["MSL", "SMAP", "SMD", "SWAT"]
+DATASETS = ["MSL", "SMAP", "SMD", "SWAT","WADI"]
 MODELS = {
     "gc8": "Autoformer",
     "gc9": "DACAD",
@@ -25,7 +25,10 @@ MODELS = {
     "gc11": "OmniAnomaly",
     "gc12": "TimesNet",
     "gc13": "TranAD",
-    "gc14": "Transformer"
+    "gc14": "Transformer",
+    "gc15": "ModernTCN",
+    "gc16": "CATCH",
+    "gc17": "StreamDaD"
 }
 
 # 在输出目录下创建子目录
@@ -371,8 +374,8 @@ def analyze_dataset(dataset):
 
         # 绘制GPU资源使用对比
         if not df_gpu.empty:
-            fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-            fig.suptitle(f"{dataset} - GPU Resource Usage", fontsize=16)
+            fig, axes = plt.subplots(2, 2, figsize=(17, 12))
+            fig.suptitle(f"{dataset} - GPU Resource Usage", fontsize=17)
 
             # 峰值内存使用
             df_gpu.plot.bar(x="Model", y="Peak Memory (MiB)", ax=axes[0, 0], rot=45)
