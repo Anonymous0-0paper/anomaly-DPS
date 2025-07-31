@@ -343,6 +343,13 @@ if __name__ == '__main__':
     parser.add_argument('--use_multi_gpu', action='store_true', help='use multiple gpus', default=False)
     parser.add_argument('--devices', type=str, default='0,1,2,3', help='device ids of multiple gpus')
 
+    parser.add_argument('--disable_gating', action='store_true', help='Disable dynamic gating')
+    parser.add_argument('--lambda_ewc', type=float, default=0.01, help='EWC regularization weight')
+    parser.add_argument('--lambda_cons', type=float, default=0.001, help='Consistency regularization weight')
+    parser.add_argument('--lambda_sparsity', type=float, default=0.0001, help='Sparsity regularization weight')
+    parser.add_argument('--lambda_entropy', type=float, default=0.001, help='Entropy regularization weight')
+    parser.add_argument('--capacity', type=int, default=1000, help='Drift buffer capacity')
+
     # de-stationary projector params
     parser.add_argument('--p_hidden_dims', type=int, nargs='+', default=[128, 128],
                         help='hidden layer dimensions of projector (List)')

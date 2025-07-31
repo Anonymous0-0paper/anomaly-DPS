@@ -1,325 +1,265 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from layers.Embed import DataEmbedding
+from typing import Tuple, Dict, Optional, List
+import logging
+
+from layers.gating import DynamicGatingNetwork
+from layers.continual import ContinualLearner
+from layers.drift_detection import DriftDetector
+
+logger = logging.getLogger(__name__)
 
 
-class TADBlock(nn.Module):
-    """StreamTAD的核心模块 - 异常检测版本"""
+class GRUEncoder(nn.Module):
+    """GRU-based encoder for processing gated input windows."""
 
     def __init__(self, configs):
-        super(TADBlock, self).__init__()
-        self.d_model = configs.d_model
-        self.d_ff = configs.d_ff
-        self.kernel_size = configs.kernel_size if hasattr(configs, 'kernel_size') else 3
+        super().__init__()
+        self.input_dim = configs.enc_in
+        self.hidden_dim = configs.d_model
+        self.num_layers = configs.e_layers
 
-        # 时间注意力机制 (带因果掩码)
-        self.temporal_attn = nn.MultiheadAttention(
-            embed_dim=configs.d_model,
-            num_heads=configs.n_heads if hasattr(configs, 'n_heads') else 4,
-            dropout=configs.dropout,
-            batch_first=True
+        self.gru = nn.GRU(
+            input_size=self.input_dim,
+            hidden_size=self.hidden_dim,
+            num_layers=self.num_layers,
+            batch_first=True,
+            dropout=configs.dropout if self.num_layers > 1 else 0
         )
 
-        # 因果卷积层
-        self.causal_conv = nn.Sequential(
-            nn.Conv1d(
-                in_channels=configs.d_model,
-                out_channels=configs.d_ff,
-                kernel_size=self.kernel_size,
-                padding=(self.kernel_size - 1)  # 这里修复了括号
-            ),
-            nn.GELU(),
-            nn.Conv1d(
-                in_channels=configs.d_ff,
-                out_channels=configs.d_model,
-                kernel_size=1
-            )
-        )
-
-        # 门控机制
-        self.gate = nn.Sequential(
-            nn.Linear(configs.d_model * 2, configs.d_model),
-            nn.Sigmoid()
-        )
-
-        # 归一化层
-        self.norm1 = nn.LayerNorm(configs.d_model)
-        self.norm2 = nn.LayerNorm(configs.d_model)
+        self.layer_norm = nn.LayerNorm(self.hidden_dim)
         self.dropout = nn.Dropout(configs.dropout)
 
-    def forward(self, x):
-        B, T, C = x.size()
+    def forward(self, x: torch.Tensor, hidden: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, torch.Tensor]:
+        output, hidden = self.gru(x, hidden)
+        output = self.layer_norm(output)
+        output = self.dropout(output)
+        return output, hidden
 
-        # 创建因果注意力掩码
-        mask = torch.triu(torch.ones(T, T, device=x.device), diagonal=1).bool()
 
-        # 残差连接
-        residual = x
+class GRUDecoder(nn.Module):
+    """GRU-based decoder for reconstructing input from encoded representations."""
 
-        # 时间注意力
-        attn_out, _ = self.temporal_attn(x, x, x, attn_mask=mask)
-        attn_out = self.dropout(attn_out)
-        x = self.norm1(x + attn_out)
+    def __init__(self, configs):
+        super().__init__()
+        self.hidden_dim = configs.d_model
+        self.output_dim = configs.enc_in
+        self.num_layers = configs.e_layers
 
-        # 因果卷积
-        conv_out = self.causal_conv(x.permute(0, 2, 1))
-        conv_out = conv_out[:, :, :-(self.kernel_size - 1)].permute(0, 2, 1)
+        self.gru = nn.GRU(
+            input_size=self.hidden_dim,
+            hidden_size=self.hidden_dim,
+            num_layers=self.num_layers,
+            batch_first=True,
+            dropout=configs.dropout if self.num_layers > 1 else 0
+        )
 
-        # 门控融合
-        gate_value = self.gate(torch.cat([x, conv_out], dim=-1))
-        fused_out = gate_value * x + (1 - gate_value) * conv_out
+        self.output_projection = nn.Linear(self.hidden_dim, self.output_dim)
+        self.layer_norm = nn.LayerNorm(self.hidden_dim)
+        self.dropout = nn.Dropout(configs.dropout)
 
-        return self.norm2(residual + fused_out)
+    def forward(self, encoded: torch.Tensor, hidden: Optional[torch.Tensor] = None) -> torch.Tensor:
+        output, _ = self.gru(encoded, hidden)
+        output = self.layer_norm(output)
+        output = self.dropout(output)
+        reconstructed = self.output_projection(output)
+        return reconstructed
+
+
+class IdentityGating(nn.Module):
+    """Identity gating layer for ablation studies."""
+
+    def __init__(self, input_dim: int):
+        super().__init__()
+        self.input_dim = input_dim
+
+    def forward(self, prev_hidden, drift_signal, correlations):
+        batch_size = drift_signal.shape[0]
+        return torch.ones(batch_size, self.input_dim, device=drift_signal.device)
 
 
 class Model(nn.Module):
-    """与TimesNet输出格式兼容的StreamTAD模型"""
+    """Main Stream-DAD model with TimesNet-compatible interface."""
 
     def __init__(self, configs):
-        super(Model, self).__init__()
+        super().__init__()
         self.configs = configs
         self.task_name = configs.task_name
         self.seq_len = configs.seq_len
         self.pred_len = configs.pred_len
-        self.total_len = self.seq_len + self.pred_len
+        self.enc_in = configs.enc_in
+        self.d_model = configs.d_model
+        self.e_layers = configs.e_layers
 
-        # 数据嵌入层
-        self.enc_embedding = DataEmbedding(
-            configs.enc_in,
-            configs.d_model,
-            configs.embed,
-            configs.freq,
-            configs.dropout
+        # Core encoder-decoder architecture
+        self.encoder = GRUEncoder(configs)
+        self.decoder = GRUDecoder(configs)
+
+        # Dynamic gating mechanism
+        if getattr(configs, 'disable_gating', False):
+            self.gating_network = IdentityGating(self.enc_in)
+        else:
+            self.gating_network = DynamicGatingNetwork(
+                input_dim=self.enc_in,
+                hidden_dim=self.d_model,
+                configs=configs
+            )
+
+        # Drift detection
+        self.drift_detector = DriftDetector(
+            input_dim=self.enc_in,
+            window_size=getattr(configs, 'drift_window_size', 50),
+            configs=configs
         )
 
-        # TAD块堆叠
-        self.tad_blocks = nn.ModuleList([
-            TADBlock(configs) for _ in range(configs.e_layers)
-        ])
+        # Continual learning components
+        self.continual_learner = ContinualLearner(
+            model=self,
+            configs=configs
+        )
 
-        # 归一化
-        self.layer_norm = nn.LayerNorm(configs.d_model)
+        # Normalization statistics
+        self.register_buffer('running_mean', torch.zeros(self.enc_in))
+        self.register_buffer('running_var', torch.ones(self.enc_in))
+        self.register_buffer('num_samples', torch.tensor(0))
 
-        # 输出投影
-        self.projection = nn.Linear(configs.d_model, configs.c_out, bias=True)
+        # Previous states
+        self.prev_hidden = None
+        self.prev_gates = None
+        self.adaptation_mode = False
 
-        # 自适应输出层
-        if self.seq_len != self.total_len:
-            self.adapt_conv = nn.Conv1d(
-                in_channels=self.seq_len,
-                out_channels=self.total_len,
-                kernel_size=1
-            )
-        else:
-            self.adapt_conv = None
+    def normalize_input(self, x: torch.Tensor) -> torch.Tensor:
+        if self.training:
+            batch_mean = x.mean(dim=(0, 1))
+            batch_var = x.var(dim=(0, 1), unbiased=False)
+            momentum = 0.1
+            self.running_mean = (1 - momentum) * self.running_mean + momentum * batch_mean
+            self.running_var = (1 - momentum) * self.running_var + momentum * batch_var
+            self.num_samples += x.shape[0] * x.shape[1]
+        return (x - self.running_mean) / (torch.sqrt(self.running_var) + 1e-8)
+
+    def forward(self, x_enc, x_mark_enc=None, x_dec=None, x_mark_dec=None, mask=None):
+        # TimesNet-compatible forward pass
+        result = self.anomaly_detection(x_enc)
+
+        # 修复：返回重构结果而不是字典
+        return result['reconstructed']
 
     def anomaly_detection(self, x_enc):
-        # 归一化处理
+        # TimesNet-style normalization
         means = x_enc.mean(1, keepdim=True).detach()
         x_enc = x_enc.sub(means)
         stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
         x_enc = x_enc.div(stdev)
 
-        # 创建全序列张量（包含预测部分）
-        input_seq = torch.zeros(x_enc.size(0), self.total_len, x_enc.size(2)).to(x_enc.device)
-        input_seq[:, :self.seq_len, :] = x_enc
+        # Main processing
+        x = x_enc
+        batch_size = x.shape[0]
 
-        # 嵌入层
-        enc_out = self.enc_embedding(input_seq, None)  # [B, T_total, C]
+        # Dynamic gating
+        drift_signal = self.drift_detector(x)
+        correlations = self.compute_spatial_correlations(x)
+        gates = self.gating_network(
+            prev_hidden=self.prev_hidden,
+            drift_signal=drift_signal,
+            correlations=correlations
+        )
+        x_gated = x * gates.unsqueeze(1)
 
-        # 通过TAD块
-        for block in self.tad_blocks:
-            enc_out = block(enc_out)
-            enc_out = self.layer_norm(enc_out)
+        # Encode and decode
+        encoded, hidden = self.encoder(x_gated, self.prev_hidden)
+        reconstructed = self.decoder(encoded)
 
-        # 输出投影
-        dec_out = self.projection(enc_out)  # [B, T_total, D_out]
+        # Anomaly scores
+        anomaly_scores = torch.norm(x - reconstructed, dim=-1, p=2)
 
-        # 处理长度适配 - 如果需要调整时间维度
-        if self.adapt_conv is not None:
-            # [B, T_total, D_out] -> [B, D_out, T_total]
-            dec_out = dec_out.permute(0, 2, 1)
-            dec_out = self.adapt_conv(dec_out)
-            # [B, D_out, T_total] -> [B, T_total, D_out]
-            dec_out = dec_out.permute(0, 2, 1)
+        # Update states
+        if batch_size == 1:
+            self.prev_hidden = hidden.detach()
+            self.prev_gates = gates.detach()
 
-        # 反归一化
-        dec_out = dec_out * stdev[:, 0, :].unsqueeze(1) + means[:, 0, :].unsqueeze(1)
+        # TimesNet-style denormalization
+        reconstructed = reconstructed.mul(stdev) + means
 
-        # 返回与TimesNet相同的输出格式
-        return dec_out
+        # 返回字典用于其他方法
+        self.last_output = {
+            'reconstructed': reconstructed,
+            'anomaly_scores': anomaly_scores,
+            'gates': gates
+        }
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-        """统一的前向传播接口 - 返回张量而非字典"""
-        # 在异常检测任务中使用相同的处理流程
-        if self.task_name == 'anomaly_detection':
-            return self.anomaly_detection(x_enc)
+        return self.last_output
 
-        # 其他任务的处理逻辑可以在此扩展
-        raise NotImplementedError(f"Task {self.task_name} not implemented for StreamTAD")
+    def compute_spatial_correlations(self, x: torch.Tensor) -> torch.Tensor:
+        batch_size, window_size, input_dim = x.shape
+        correlations = torch.zeros(batch_size, input_dim, device=x.device)
+        for b in range(batch_size):
+            sample = x[b]
+            sample_centered = sample - sample.mean(dim=0, keepdim=True)
+            cov_matrix = torch.mm(sample_centered.T, sample_centered) / (window_size - 1)
+            std_devs = torch.sqrt(torch.diag(cov_matrix))
+            corr_matrix = cov_matrix / (std_devs.unsqueeze(0) * std_devs.unsqueeze(1) + 1e-8)
+            threshold = getattr(self.configs, 'correlation_threshold', 0.3)
+            significant_corrs = (torch.abs(corr_matrix) > threshold).float()
+            correlations[b] = significant_corrs.sum(dim=1) - 1
+        return correlations
 
+    def compute_loss(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+        # 使用最后的前向传播输出
+        if not hasattr(self, 'last_output'):
+            self.anomaly_detection(x)
 
-# # import torch
-# # import torch.nn as nn
-# # import torch.nn.functional as F
-# # from layers.Embed import DataEmbedding
-# #
-# #
-# # class TADBlock(nn.Module):
-# #     """StreamTAD的核心模块，替换TimesNet中的TimesBlock"""
-# #
-# #     def __init__(self, configs):
-# #         super(TADBlock, self).__init__()
-# #         self.d_model = configs.d_model
-# #         self.d_ff = configs.d_ff
-# #         self.kernel_size = configs.kernel_size if hasattr(configs, 'kernel_size') else 3
-# #
-# #         # 时间注意力机制
-# #         self.temporal_attn = nn.MultiheadAttention(
-# #             embed_dim=configs.d_model,
-# #             num_heads=configs.n_heads if hasattr(configs, 'n_heads') else 4,
-# #             dropout=configs.dropout,
-# #             batch_first=True
-# #         )
-# #
-# #         # 因果卷积层 (确保不会使用未来信息)
-# #         self.causal_conv = nn.Sequential(
-# #             nn.Conv1d(
-# #                 in_channels=configs.d_model,
-# #                 out_channels=configs.d_ff,
-# #                 kernel_size=self.kernel_size,
-# #                 padding=(self.kernel_size - 1),  # 保持长度不变
-# #                 padding_mode='replicate'
-# #             ),
-# #             nn.GELU(),
-# #             nn.Conv1d(
-# #                 in_channels=configs.d_ff,
-# #                 out_channels=configs.d_model,
-# #                 kernel_size=1
-# #             )
-# #         )
-# #
-# #         # 自适应门控机制
-# #         self.gate = nn.Sequential(
-# #             nn.Linear(configs.d_model * 2, configs.d_model),
-# #             nn.Sigmoid()
-# #         )
-# #
-# #         # 归一化层
-# #         self.norm1 = nn.LayerNorm(configs.d_model)
-# #         self.norm2 = nn.LayerNorm(configs.d_model)
-# #         self.dropout = nn.Dropout(configs.dropout)
-# #
-# #     def forward(self, x):
-# #         """
-# #         输入: [B, T, C]
-# #         输出: [B, T, C]
-# #         """
-# #         # 残差连接
-# #         residual = x
-# #
-# #         # 时间注意力（添加因果掩码）
-# #         device = x.device
-# #         batch_size, seq_len, _ = x.size()
-# #         mask = torch.triu(torch.ones(seq_len, seq_len, device=device), diagonal=1).bool()
-# #         attn_out, _ = self.temporal_attn(x, x, x, attn_mask=mask)
-# #         attn_out = self.dropout(attn_out)
-# #         x = self.norm1(x + attn_out)
-# #
-# #         # 因果卷积处理 (需要转换为 [B, C, T] 格式)
-# #         conv_out = self.causal_conv(x.permute(0, 2, 1))
-# #
-# #         # 裁剪右侧多余的填充 (保持因果性)
-# #         conv_out = conv_out[:, :, :-(self.kernel_size - 1)].permute(0, 2, 1)
-# #
-# #         # 门控融合
-# #         gate_input = torch.cat([x, conv_out], dim=-1)
-# #         gate_value = self.gate(gate_input)
-# #         fused_out = gate_value * x + (1 - gate_value) * conv_out
-# #
-# #         # 最终输出
-# #         return self.norm2(residual + fused_out)
-# #
-# #
-# # class Model(nn.Module):
-# #     """完整的StreamTAD模型，兼容TimesNet的配置接口"""
-# #
-# #     def __init__(self, configs):
-# #         super(Model, self).__init__()
-# #         self.configs = configs
-# #         self.task_name = configs.task_name
-# #         self.seq_len = configs.seq_len
-# #         self.label_len = configs.label_len
-# #         self.pred_len = configs.pred_len
-# #         self.total_len = self.seq_len + self.pred_len
-# #
-# #         # 数据嵌入层 (复用TimesNet的Embedding)
-# #         self.enc_embedding = DataEmbedding(
-# #             configs.enc_in,
-# #             configs.d_model,
-# #             configs.embed,
-# #             configs.freq,
-# #             configs.dropout
-# #         )
-# #
-# #         # StreamTAD块堆叠
-# #         self.tad_blocks = nn.ModuleList([
-# #             TADBlock(configs) for _ in range(configs.e_layers)
-# #         ])
-# #
-# #         # 归一化和输出投影
-# #         self.layer_norm = nn.LayerNorm(configs.d_model)
-# #         self.projection = nn.Linear(configs.d_model, configs.c_out, bias=True)
-# #
-# #         # 修复自适应输出层问题
-# #         # 使用插值替代卷积进行长度调整
-# #         self.adapt_output = nn.Sequential(
-# #             nn.Linear(self.seq_len, self.total_len),
-# #             nn.ReLU()
-# #         ) if self.seq_len != self.total_len else nn.Identity()
-# #
-# #     def anomaly_detection(self, x_enc):
-# #         """异常检测模式，保持与TimesNet相同的归一化流程"""
-# #         # 归一化处理
-# #         means = x_enc.mean(1, keepdim=True).detach()
-# #         x_enc = x_enc.sub(means)
-# #         stdev = torch.sqrt(
-# #             torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5
-# #         )
-# #         x_enc = x_enc.div(stdev)
-# #
-# #         # 创建全序列张量（包含预测部分）
-# #         input_seq = torch.zeros(x_enc.size(0), self.total_len, x_enc.size(2)).to(x_enc.device)
-# #         input_seq[:, :self.seq_len, :] = x_enc
-# #
-# #         # 嵌入层
-# #         enc_out = self.enc_embedding(input_seq, None)  # [B, T_total, C]
-# #
-# #         # 通过StreamTAD块
-# #         for block in self.tad_blocks:
-# #             enc_out = block(enc_out)
-# #             enc_out = self.layer_norm(enc_out)
-# #
-# #         # 输出投影
-# #         dec_out = self.projection(enc_out)  # [B, T_total, D_out]
-# #
-# #         # 处理长度适配 - 使用线性层替代卷积
-# #         if self.seq_len != self.total_len:
-# #             # [B, T_total, D_out] -> [B, D_out, T_total]
-# #             dec_out = dec_out.permute(0, 2, 1)
-# #             dec_out = self.adapt_output(dec_out)  # 线性层调整
-# #             dec_out = dec_out.permute(0, 2, 1)
-# #
-# #         # 反归一化
-# #         dec_out = dec_out * stdev[:, 0, :].unsqueeze(1) + means[:, 0, :].unsqueeze(1)
-# #         return dec_out
-# #
-# #     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-# #         """统一的前向传播接口"""
-# #         # 在异常检测任务中使用相同的处理流程
-# #         if self.task_name == 'anomaly_detection':
-# #             return self.anomaly_detection(x_enc)
-# #
-# #         # 其他任务的处理逻辑可以在此扩展
-# #         raise NotImplementedError(f"Task {self.task_name} not implemented for StreamTAD")
+        reconstructed = self.last_output['reconstructed']
+        gates = self.last_output.get('gates', None)
+
+        # Reconstruction loss
+        recon_loss = F.mse_loss(reconstructed, x)
+
+        # Regularization losses
+        ewc_loss = self.continual_learner.compute_ewc_loss()
+
+        consistency_loss = torch.tensor(0.0, device=x.device)
+        if gates is not None and self.prev_gates is not None:
+            consistency_loss = F.mse_loss(gates, self.prev_gates)
+
+        sparsity_loss = torch.tensor(0.0, device=x.device)
+        if gates is not None:
+            l1_loss = torch.norm(gates, p=1, dim=-1).mean()
+            entropy_loss = -torch.sum(gates * torch.log(gates + 1e-8), dim=-1).mean()
+            sparsity_loss = l1_loss + getattr(self.configs, 'lambda_entropy', 0.001) * entropy_loss
+
+        # Total loss with configurable weights
+        total_loss = (recon_loss +
+                      getattr(self.configs, 'lambda_ewc', 0.01) * ewc_loss +
+                      getattr(self.configs, 'lambda_cons', 0.001) * consistency_loss +
+                      getattr(self.configs, 'lambda_sparsity', 0.0001) * sparsity_loss)
+
+        return {
+            'total_loss': total_loss,
+            'recon_loss': recon_loss,
+            'ewc_loss': ewc_loss,
+            'consistency_loss': consistency_loss,
+            'sparsity_loss': sparsity_loss
+        }
+
+    def adapt_to_drift(self, x: torch.Tensor) -> None:
+        self.adaptation_mode = True
+        self.continual_learner.update_fisher_information(x)
+        drift_magnitude = self.drift_detector.get_current_drift_magnitude()
+        self.adapt_hyperparameters(drift_magnitude)
+        self.adaptation_mode = False
+
+    def adapt_hyperparameters(self, drift_magnitude: float) -> None:
+        base_ewc = getattr(self.configs, 'lambda_ewc_base', 0.01)
+        self.configs.lambda_ewc = base_ewc * torch.exp(-torch.tensor(drift_magnitude))
+
+        base_cons = getattr(self.configs, 'lambda_cons_base', 0.001)
+        self.configs.lambda_cons = base_cons * (1 + drift_magnitude)
+
+    def reset_states(self) -> None:
+        self.prev_hidden = None
+        self.prev_gates = None
+        self.drift_detector.reset()
+        self.continual_learner.reset()
+
