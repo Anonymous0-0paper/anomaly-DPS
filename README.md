@@ -161,3 +161,12 @@ chmod +x run_cluster.sh
 ```
 ### Logs
 Model execution logs are stored in `anomaly-DPS/logs`, GPU memory records are stored in `anomaly-DPS/logs/dataset_name/gpu_mem`.
+
+### Running Your Own Scripts
+
+If you want to add more scripts or change the directory of your scripts, follow these steps:
+1. Edit the run_cluster.sh Script.
+2. Set your script directory:
+`script_dir="scripts/anomaly_detection/MSL"`
+3. Change your node to ensure the scripts run on the correct node:
+`gc{8..16}` 
